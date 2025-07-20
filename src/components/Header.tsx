@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ChevronDown, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,10 +15,8 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const businessMenuItems = [
-    { name: 'Prabas Holidays', href: '#holidays' },
-    { name: 'Flights Nepal', href: '#flights' },
-    { name: 'Hotel Bookings', href: '#hotels' },
-    { name: 'Tour Packages', href: '#packages' },
+    { name: 'Prabas Holidays', href: '/prabas-holidays' },
+    { name: 'Flights Nepal', href: '/flights-nepal' },
   ];
 
   return (
@@ -46,11 +45,13 @@ const Header = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
-              alt="Prabas Travels Logo" 
-              className="h-16 w-auto object-contain"
-            />
+            <Link to="/">
+              <img 
+                src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
+                alt="Prabas Travels Logo" 
+                className="h-16 w-auto object-contain"
+              />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -58,15 +59,15 @@ const Header = () => {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <a href="#home" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/" className="px-4 py-2 hover:text-primary transition-colors">
                     Home
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
                 
                 <NavigationMenuItem>
-                  <a href="#about" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/about" className="px-4 py-2 hover:text-primary transition-colors">
                     About Us
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
@@ -74,40 +75,40 @@ const Header = () => {
                   <NavigationMenuContent>
                     <div className="w-64 p-4">
                       {businessMenuItems.map((item) => (
-                        <a
+                        <Link
                           key={item.name}
-                          href={item.href}
+                          to={item.href}
                           className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                         >
                           {item.name}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <a href="#team" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/team" className="px-4 py-2 hover:text-primary transition-colors">
                     Our Team
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <a href="#testimonials" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/testimonials" className="px-4 py-2 hover:text-primary transition-colors">
                     Testimonials
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <a href="#blog" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/blog" className="px-4 py-2 hover:text-primary transition-colors">
                     Blog
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <a href="#contact" className="px-4 py-2 hover:text-primary transition-colors">
+                  <Link to="/inquiries" className="px-4 py-2 hover:text-primary transition-colors">
                     Inquiries
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -130,24 +131,24 @@ const Header = () => {
         {isOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-border">
             <div className="space-y-2 pt-4">
-              <a href="#home" className="block px-4 py-2 hover:bg-accent rounded-md">Home</a>
-              <a href="#about" className="block px-4 py-2 hover:bg-accent rounded-md">About Us</a>
+              <Link to="/" className="block px-4 py-2 hover:bg-accent rounded-md">Home</Link>
+              <Link to="/about" className="block px-4 py-2 hover:bg-accent rounded-md">About Us</Link>
               
               <div className="px-4 py-2">
                 <span className="font-semibold">Our Businesses</span>
                 <div className="ml-4 mt-2 space-y-1">
                   {businessMenuItems.map((item) => (
-                    <a key={item.name} href={item.href} className="block py-1 text-sm hover:text-primary">
+                    <Link key={item.name} to={item.href} className="block py-1 text-sm hover:text-primary">
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
               
-              <a href="#team" className="block px-4 py-2 hover:bg-accent rounded-md">Our Team</a>
-              <a href="#testimonials" className="block px-4 py-2 hover:bg-accent rounded-md">Testimonials</a>
-              <a href="#blog" className="block px-4 py-2 hover:bg-accent rounded-md">Blog</a>
-              <a href="#contact" className="block px-4 py-2 hover:bg-accent rounded-md">Inquiries</a>
+              <Link to="/team" className="block px-4 py-2 hover:bg-accent rounded-md">Our Team</Link>
+              <Link to="/testimonials" className="block px-4 py-2 hover:bg-accent rounded-md">Testimonials</Link>
+              <Link to="/blog" className="block px-4 py-2 hover:bg-accent rounded-md">Blog</Link>
+              <Link to="/inquiries" className="block px-4 py-2 hover:bg-accent rounded-md">Inquiries</Link>
             </div>
           </div>
         )}
