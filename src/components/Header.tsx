@@ -45,16 +45,12 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <img 
-              src="https://images.unsplash.com/photo-1469041797191-50ace28483c3?w=50&h=50&fit=crop&crop=center" 
+              src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
               alt="Prabas Travels Logo" 
-              className="h-12 w-12 rounded-full object-cover"
+              className="h-16 w-auto object-contain"
             />
-            <div>
-              <h1 className="text-2xl font-bold text-primary">Prabas Travels</h1>
-              <p className="text-sm text-muted-foreground">& Tours Pvt. Ltd.</p>
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -116,7 +112,7 @@ const Header = () => {
               </NavigationMenuList>
             </NavigationMenu>
 
-            <Button>Get Quote</Button>
+            <Button className="bg-accent hover:bg-accent/90">Get Quote</Button>
           </div>
 
           {/* Mobile Menu Button */}

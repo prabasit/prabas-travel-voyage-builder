@@ -6,7 +6,7 @@ import { MapPin, Calendar, Users, Star } from 'lucide-react';
 
 const Hero = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center">
+    <section id="home" className="relative min-h-screen flex items-center justify-center pt-24">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -22,7 +22,7 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
             Discover Nepal with 
-            <span className="text-yellow-400 block">Prabas Travels</span>
+            <span className="text-accent block">Prabas Travels</span>
           </h1>
           
           <p className="text-xl md:text-2xl mb-8 opacity-90">
@@ -31,7 +31,7 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="text-lg px-8 py-4 bg-yellow-600 hover:bg-yellow-700">
+            <Button size="lg" className="text-lg px-8 py-4 bg-accent hover:bg-accent/90">
               Explore Packages
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-black">
@@ -43,7 +43,7 @@ const Hero = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
-                <Calendar className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+                <Calendar className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">25+</div>
                 <div className="text-sm opacity-80">Years Experience</div>
               </CardContent>
@@ -51,7 +51,7 @@ const Hero = () => {
             
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
-                <Users className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+                <Users className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">10K+</div>
                 <div className="text-sm opacity-80">Happy Travelers</div>
               </CardContent>
@@ -59,7 +59,7 @@ const Hero = () => {
             
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
-                <MapPin className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+                <MapPin className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">50+</div>
                 <div className="text-sm opacity-80">Destinations</div>
               </CardContent>
@@ -67,7 +67,7 @@ const Hero = () => {
             
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
-                <Star className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+                <Star className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">4.9</div>
                 <div className="text-sm opacity-80">Rating</div>
               </CardContent>
