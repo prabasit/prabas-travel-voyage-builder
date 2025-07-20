@@ -13,7 +13,8 @@ import {
   Plane,
   Globe,
   Mail,
-  Info
+  Info,
+  Briefcase
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -33,6 +34,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
     { icon: Info, label: 'About Us', path: '/admin/about' },
     { icon: Users, label: 'Team Management', path: '/admin/team' },
+    { icon: Briefcase, label: 'Career Management', path: '/admin/careers' },
     { icon: FileText, label: 'Blog Management', path: '/admin/blogs' },
     { icon: MessageSquare, label: 'Testimonials', path: '/admin/testimonials' },
     { icon: Award, label: 'Awards', path: '/admin/awards' },

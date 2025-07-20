@@ -94,6 +94,12 @@ const Header = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
+                  <Link to="/careers" className="px-4 py-2 hover:text-primary transition-colors">
+                    Careers
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
                   <Link to="/testimonials" className="px-4 py-2 hover:text-primary transition-colors">
                     Testimonials
                   </Link>
@@ -146,6 +152,7 @@ const Header = () => {
               </div>
               
               <Link to="/team" className="block px-4 py-2 hover:bg-accent rounded-md">Our Team</Link>
+              <Link to="/careers" className="block px-4 py-2 hover:bg-accent rounded-md">Careers</Link>
               <Link to="/testimonials" className="block px-4 py-2 hover:bg-accent rounded-md">Testimonials</Link>
               <Link to="/blog" className="block px-4 py-2 hover:bg-accent rounded-md">Blog</Link>
               <Link to="/inquiries" className="block px-4 py-2 hover:bg-accent rounded-md">Inquiries</Link>

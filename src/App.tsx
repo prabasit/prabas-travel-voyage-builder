@@ -12,6 +12,7 @@ import Testimonials from "./pages/Testimonials";
 import Blog from "./pages/Blog";
 import Inquiries from "./pages/Inquiries";
 import Awards from "./pages/Awards";
+import Careers from "./pages/Careers";
 import FlightsNepal from "./pages/FlightsNepal";
 import PrabasHolidays from "./pages/PrabasHolidays";
 import Login from "./pages/admin/Login";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/inquiries" element={<Inquiries />} />
           <Route path="/awards" element={<Awards />} />
+          <Route path="/careers" element={<Careers />} />
           <Route path="/flights-nepal" element={<FlightsNepal />} />
           <Route path="/prabas-holidays" element={<PrabasHolidays />} />
           <Route path="/admin/login" element={<Login />} />

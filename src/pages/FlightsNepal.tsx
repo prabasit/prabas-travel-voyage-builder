@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plane, Clock, Shield, MapPin, Star, CreditCard } from 'lucide-react';
+import { Plane, Clock, Shield, MapPin, ExternalLink } from 'lucide-react';
 
 const FlightsNepal = () => {
   const features = [
@@ -30,6 +30,10 @@ const FlightsNepal = () => {
     }
   ];
 
+  const handleVisitWebsite = () => {
+    window.open('https://flightsnepal.com', '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -48,13 +52,18 @@ const FlightsNepal = () => {
               Nepal's Leading Flight Booking Platform - Your gateway to domestic and international destinations 
               with the most advanced ticketing system and competitive prices.
             </p>
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-              Book Your Flight Now
+            <Button 
+              size="lg" 
+              className="bg-accent hover:bg-accent/90 text-white"
+              onClick={handleVisitWebsite}
+            >
+              <ExternalLink className="mr-2 h-5 w-5" />
+              Visit FlightsNepal.com
             </Button>
           </div>
         </section>
 
-        {/* Services Section */}
+        {/* Features Section */}
         <section className="py-20">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center mb-16">Our Flight Services</h2>
@@ -73,29 +82,15 @@ const FlightsNepal = () => {
               ))}
             </div>
 
-            {/* Popular Routes */}
-            <div className="bg-muted/50 rounded-lg p-8">
-              <h3 className="text-3xl font-bold text-center mb-8">Popular Routes</h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <h4 className="font-semibold mb-2">Kathmandu ↔ Pokhara</h4>
-                    <p className="text-sm text-muted-foreground">Starting from NPR 4,500</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <h4 className="font-semibold mb-2">Kathmandu ↔ Delhi</h4>
-                    <p className="text-sm text-muted-foreground">Starting from NPR 18,000</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <h4 className="font-semibold mb-2">Kathmandu ↔ Dubai</h4>
-                    <p className="text-sm text-muted-foreground">Starting from NPR 35,000</p>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="text-center">
+              <Button 
+                size="lg" 
+                onClick={handleVisitWebsite}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <ExternalLink className="mr-2 h-5 w-5" />
+                Book Your Flight Now
+              </Button>
             </div>
           </div>
         </section>
