@@ -1,10 +1,9 @@
-
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Globe, Passport, Shield, MapPin, Star, Camera } from 'lucide-react';
+import { Globe, FileText, Shield, MapPin, Star, Camera } from 'lucide-react';
 
 const PrabasHolidays = () => {
   const services = [
@@ -14,7 +13,7 @@ const PrabasHolidays = () => {
       description: 'Customized vacation packages to destinations worldwide including Europe, Asia, America, and Australia'
     },
     {
-      icon: Passport,
+      icon: FileText,
       title: 'Visa Services',
       description: 'Complete visa assistance and documentation for all international destinations'
     },
