@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -14,7 +16,8 @@ import {
   Globe,
   Mail,
   Info,
-  Briefcase
+  Briefcase,
+  File
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -24,14 +27,62 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated');
-    navigate('/admin/login');
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error || !user) {
+        navigate('/admin/login');
+        return;
+      }
+
+      // Check if user is admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+
+      if (adminError || !adminData) {
+        await supabase.auth.signOut();
+        navigate('/admin/login');
+        return;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      navigate('/admin/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out successfully",
+      });
+      navigate('/admin/login');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
+    }
   };
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
+    { icon: File, label: 'Pages', path: '/admin/pages' },
     { icon: Info, label: 'About Us', path: '/admin/about' },
     { icon: Users, label: 'Team Management', path: '/admin/team' },
     { icon: Briefcase, label: 'Career Management', path: '/admin/careers' },
@@ -43,6 +94,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: Mail, label: 'Inquiries', path: '/admin/inquiries' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">

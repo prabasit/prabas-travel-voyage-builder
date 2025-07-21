@@ -6,29 +6,65 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
-    if (username === 'admin' && password === 'admin123') {
-      localStorage.setItem('adminAuthenticated', 'true');
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if user is admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .eq('is_active', true)
+        .single();
+
+      if (adminError || !adminData) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin permissions",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Login Successful",
         description: "Welcome to Admin Dashboard",
       });
       navigate('/admin/dashboard');
-    } else {
+    } catch (error) {
       toast({
         title: "Login Failed",
-        description: "Invalid username or password",
+        description: "An error occurred during login",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,13 +82,13 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -63,12 +99,12 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Enter your password"
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </CardContent>

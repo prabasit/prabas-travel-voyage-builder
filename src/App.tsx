@@ -17,6 +17,8 @@ import FlightsNepal from "./pages/FlightsNepal";
 import PrabasHolidays from "./pages/PrabasHolidays";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
+import Pages from "./pages/admin/Pages";
+import AdminAbout from "./pages/admin/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/pages" element={<Pages />} />
+          <Route path="/admin/about" element={<AdminAbout />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
