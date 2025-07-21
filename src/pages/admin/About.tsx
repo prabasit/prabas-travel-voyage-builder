@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,22 +34,23 @@ const About = () => {
       
       if (error && error.code !== 'PGRST116') throw error;
       return data;
-    },
-    onSuccess: (data) => {
-      if (data) {
-        setFormData({
-          title: data.title || '',
-          description: data.description || '',
-          story: data.story || '',
-          mission: data.mission || '',
-          vision: data.vision || '',
-          values: Array.isArray(data.values) ? data.values.join(', ') : '',
-          stats: data.stats ? JSON.stringify(data.stats, null, 2) : '',
-          image_url: data.image_url || ''
-        });
-      }
     }
   });
+
+  useEffect(() => {
+    if (aboutData) {
+      setFormData({
+        title: aboutData.title || '',
+        description: aboutData.description || '',
+        story: aboutData.story || '',
+        mission: aboutData.mission || '',
+        vision: aboutData.vision || '',
+        values: Array.isArray(aboutData.values) ? aboutData.values.join(', ') : '',
+        stats: aboutData.stats ? JSON.stringify(aboutData.stats, null, 2) : '',
+        image_url: aboutData.image_url || ''
+      });
+    }
+  }, [aboutData]);
 
   const updateAboutMutation = useMutation({
     mutationFn: async (data: any) => {
