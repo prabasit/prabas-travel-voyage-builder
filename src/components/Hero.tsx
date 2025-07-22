@@ -34,7 +34,7 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/flights-nepal">
               <Button size="lg" className="text-lg px-8 py-4 bg-accent hover:bg-accent/90">
-                Book Flights
+                 Flights
               </Button>
             </Link>
             <Link to="/prabas-holidays">
