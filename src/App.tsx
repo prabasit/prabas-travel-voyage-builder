@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,17 +14,19 @@ import Awards from "./pages/Awards";
 import Careers from "./pages/Careers";
 import FlightsNepal from "./pages/FlightsNepal";
 import PrabasHolidays from "./pages/PrabasHolidays";
-import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import Pages from "./pages/admin/Pages";
 import AdminAbout from "./pages/admin/About";
 import TeamManagement from "./pages/admin/TeamManagement";
 import ServicesManagement from "./pages/admin/ServicesManagement";
+import CareerManagement from "./pages/admin/CareerManagement";
+import CareerApplicationsManagement from "./pages/admin/CareerApplicationsManagement";
 import BlogManagement from "./pages/admin/BlogManagement";
 import TestimonialsManagement from "./pages/admin/TestimonialsManagement";
 import AwardsManagement from "./pages/admin/AwardsManagement";
 import InquiriesManagement from "./pages/admin/InquiriesManagement";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -47,17 +48,19 @@ const App = () => (
           <Route path="/careers" element={<Careers />} />
           <Route path="/flights-nepal" element={<FlightsNepal />} />
           <Route path="/prabas-holidays" element={<PrabasHolidays />} />
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin" element={<Login />} />
+          <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/pages" element={<Pages />} />
           <Route path="/admin/about" element={<AdminAbout />} />
           <Route path="/admin/team" element={<TeamManagement />} />
           <Route path="/admin/services" element={<ServicesManagement />} />
+          <Route path="/admin/careers" element={<CareerManagement />} />
+          <Route path="/admin/career-applications" element={<CareerApplicationsManagement />} />
           <Route path="/admin/blogs" element={<BlogManagement />} />
           <Route path="/admin/testimonials" element={<TestimonialsManagement />} />
           <Route path="/admin/awards" element={<AwardsManagement />} />
           <Route path="/admin/inquiries" element={<InquiriesManagement />} />
+          <Route path="/admin/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
