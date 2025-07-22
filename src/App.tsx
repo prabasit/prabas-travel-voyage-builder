@@ -20,6 +20,11 @@ import Dashboard from "./pages/admin/Dashboard";
 import Pages from "./pages/admin/Pages";
 import AdminAbout from "./pages/admin/About";
 import TeamManagement from "./pages/admin/TeamManagement";
+import ServicesManagement from "./pages/admin/ServicesManagement";
+import BlogManagement from "./pages/admin/BlogManagement";
+import TestimonialsManagement from "./pages/admin/TestimonialsManagement";
+import AwardsManagement from "./pages/admin/AwardsManagement";
+import InquiriesManagement from "./pages/admin/InquiriesManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +53,11 @@ const App = () => (
           <Route path="/admin/pages" element={<Pages />} />
           <Route path="/admin/about" element={<AdminAbout />} />
           <Route path="/admin/team" element={<TeamManagement />} />
+          <Route path="/admin/services" element={<ServicesManagement />} />
+          <Route path="/admin/blogs" element={<BlogManagement />} />
+          <Route path="/admin/testimonials" element={<TestimonialsManagement />} />
+          <Route path="/admin/awards" element={<AwardsManagement />} />
+          <Route path="/admin/inquiries" element={<InquiriesManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

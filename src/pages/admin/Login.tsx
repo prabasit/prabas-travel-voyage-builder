@@ -9,8 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@flightsnepal.com');
+  const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,6 +30,7 @@ const Login = () => {
       console.log('Login response:', data, error);
 
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Login Failed",
           description: error.message,
@@ -77,7 +78,8 @@ const Login = () => {
           />
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Use: admin@flightsnepal.com / admin123
+            Email: admin@flightsnepal.com<br/>
+            Password: admin123
           </p>
         </CardHeader>
         <CardContent>

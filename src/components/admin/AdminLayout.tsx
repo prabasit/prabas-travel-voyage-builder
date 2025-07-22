@@ -16,7 +16,8 @@ import {
   Mail,
   Info,
   Briefcase,
-  File
+  File,
+  Wrench
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -65,6 +66,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: File, label: 'Pages', path: '/admin/pages' },
     { icon: Info, label: 'About Us', path: '/admin/about' },
     { icon: Users, label: 'Team Management', path: '/admin/team' },
+    { icon: Wrench, label: 'Services', path: '/admin/services' },
     { icon: Briefcase, label: 'Career Management', path: '/admin/careers' },
     { icon: FileText, label: 'Blog Management', path: '/admin/blogs' },
     { icon: MessageSquare, label: 'Testimonials', path: '/admin/testimonials' },

@@ -128,6 +128,73 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_comments: {
+        Row: {
+          author_email: string
+          author_name: string
+          blog_id: string | null
+          comment_text: string
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+        }
+        Insert: {
+          author_email: string
+          author_name: string
+          blog_id?: string | null
+          comment_text: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+        }
+        Update: {
+          author_email?: string
+          author_name?: string
+          blog_id?: string | null
+          comment_text?: string
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_blog_id_fkey"
+            columns: ["blog_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_likes: {
+        Row: {
+          blog_id: string | null
+          created_at: string | null
+          id: string
+          user_email: string
+        }
+        Insert: {
+          blog_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_email: string
+        }
+        Update: {
+          blog_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_likes_blog_id_fkey"
+            columns: ["blog_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -296,6 +363,42 @@ export type Database = {
           is_published?: boolean | null
           meta_description?: string | null
           slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
           title?: string
           updated_at?: string | null
         }
