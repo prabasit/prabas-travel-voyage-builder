@@ -38,7 +38,7 @@ const Hero = () => {
               </Button>
             </Link>
             <Link to="/prabas-holidays">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-black">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-orange hover:bg-white hover:text-black">
                 Holiday Packages
               </Button>
             </Link>
