@@ -20,10 +20,14 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      console.log('Attempting login with:', email, password);
+      
+      const { data, error } = await supabase.rpc('admin_login', {
+        login_email: email,
+        login_password: password
       });
+
+      console.log('Login response:', data, error);
 
       if (error) {
         toast({
@@ -34,30 +38,24 @@ const Login = () => {
         return;
       }
 
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('user_id', data.user.id)
-        .eq('is_active', true)
-        .single();
-
-      if (adminError || !adminData) {
-        await supabase.auth.signOut();
+      if (data && data.length > 0 && data[0].success) {
+        // Store admin data in localStorage
+        localStorage.setItem('admin_user', JSON.stringify(data[0].user_data));
+        
         toast({
-          title: "Access Denied",
-          description: "You don't have admin permissions",
+          title: "Login Successful",
+          description: "Welcome to Admin Dashboard",
+        });
+        navigate('/admin/dashboard');
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
           variant: "destructive",
         });
-        return;
       }
-
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Admin Dashboard",
-      });
-      navigate('/admin/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: "An error occurred during login",
@@ -78,6 +76,9 @@ const Login = () => {
             className="h-16 mx-auto mb-4"
           />
           <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Use: admin@flightsnepal.com / admin123
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

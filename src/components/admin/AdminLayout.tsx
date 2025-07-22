@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   LayoutDashboard, 
@@ -29,55 +28,36 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState<any>(null);
 
   useEffect(() => {
     checkAuth();
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
+      const adminData = localStorage.getItem('admin_user');
+      if (!adminData) {
         navigate('/admin/login');
         return;
       }
 
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .single();
-
-      if (adminError || !adminData) {
-        await supabase.auth.signOut();
-        navigate('/admin/login');
-        return;
-      }
-
+      const user = JSON.parse(adminData);
+      setAdminUser(user);
       setLoading(false);
     } catch (error) {
+      console.error('Auth check error:', error);
       navigate('/admin/login');
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Logged Out",
-        description: "You have been logged out successfully",
-      });
-      navigate('/admin/login');
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to logout",
-        variant: "destructive",
-      });
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('admin_user');
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully",
+    });
+    navigate('/admin/login');
   };
 
   const menuItems = [
@@ -117,6 +97,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             className="h-12 mx-auto mb-2"
           />
           <h2 className="text-lg font-semibold text-center">Admin Panel</h2>
+          {adminUser && (
+            <p className="text-sm text-center text-primary-foreground/80 mt-1">
+              {adminUser.email}
+            </p>
+          )}
         </div>
         
         <nav className="flex-1 p-4">
