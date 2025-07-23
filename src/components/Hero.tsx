@@ -53,7 +53,7 @@ const Hero = () => {
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
                 <Calendar className="h-8 w-8 mx-auto mb-2 text-accent" />
-                <div className="text-2xl font-bold">25+</div>
+                <div className="text-2xl font-bold">12</div>
                 <div className="text-sm opacity-80">Years Experience</div>
               </CardContent>
             </Card>
