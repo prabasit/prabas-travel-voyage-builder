@@ -50,7 +50,7 @@ const Hero = () => {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
               <CardContent className="p-4 text-center">
                 <Calendar className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">12</div>
