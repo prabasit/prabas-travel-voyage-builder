@@ -33,19 +33,19 @@ const Hero = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/flights-nepal">
-              <Button size="lg" className="text-lg px-8 py-4 bg-accent hover:bg-accent/90">
+              <Button size="lg"  className="text-lg px-8 py-4 border-blue-600 text-white bg-blue-600 hover:bg-blue-500/80 hover:text-white">
                  Flights
               </Button>
             </Link>
            <Link to="/prabas-holidays">
   <Button
-    size="lg"
-    variant="outline"
-    className="text-lg px-8 py-4 border-blue-600 text-white bg-blue-600 hover:bg-blue-500/80 hover:text-white"
-  >
-    Holiday Packages
-  </Button>
-</Link>
+          size="lg"
+          variant="outline" className="text-lg px-8 py-4 bg-accent hover:bg-accent/90"
+       
+            >
+            Holiday Packages
+        </Button>
+        </Link>
           </div>
 
           {/* Quick Stats */}
