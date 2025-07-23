@@ -34,7 +34,15 @@ const AboutSection = () => {
         .single();
 
       if (error) throw error;
-      setAboutData(data);
+      
+      // Ensure arrays are properly formatted
+      const processedData = {
+        ...data,
+        values: Array.isArray(data.values) ? data.values : [],
+        stats: Array.isArray(data.stats) ? data.stats : []
+      };
+      
+      setAboutData(processedData);
     } catch (error) {
       console.error('Error fetching about data:', error);
       // Fallback data if CMS is empty
@@ -78,6 +86,10 @@ const AboutSection = () => {
 
   if (!aboutData) return null;
 
+  // Ensure we have arrays before mapping
+  const statsArray = Array.isArray(aboutData.stats) ? aboutData.stats : [];
+  const valuesArray = Array.isArray(aboutData.values) ? aboutData.values : [];
+
   return (
     <section id="about" className="py-20 bg-background">
       <div className="container mx-auto px-4">
@@ -119,35 +131,39 @@ const AboutSection = () => {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-          {aboutData.stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
-              <div className="text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Values Section */}
-        <div>
-          <h3 className="text-3xl font-bold text-center mb-12">Our Values</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {aboutData.values.map((value, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    {index === 0 && <Award className="h-12 w-12 mx-auto text-primary" />}
-                    {index === 1 && <Globe className="h-12 w-12 mx-auto text-primary" />}
-                    {index === 2 && <Heart className="h-12 w-12 mx-auto text-primary" />}
-                    {index === 3 && <Users className="h-12 w-12 mx-auto text-primary" />}
-                  </div>
-                  <h4 className="text-xl font-semibold mb-2">{value.title}</h4>
-                  <p className="text-muted-foreground">{value.description}</p>
-                </CardContent>
-              </Card>
+        {statsArray.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+            {statsArray.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
+                <div className="text-muted-foreground">{stat.label}</div>
+              </div>
             ))}
           </div>
-        </div>
+        )}
+
+        {/* Values Section */}
+        {valuesArray.length > 0 && (
+          <div>
+            <h3 className="text-3xl font-bold text-center mb-12">Our Values</h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {valuesArray.map((value, index) => (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      {index === 0 && <Award className="h-12 w-12 mx-auto text-primary" />}
+                      {index === 1 && <Globe className="h-12 w-12 mx-auto text-primary" />}
+                      {index === 2 && <Heart className="h-12 w-12 mx-auto text-primary" />}
+                      {index === 3 && <Users className="h-12 w-12 mx-auto text-primary" />}
+                    </div>
+                    <h4 className="text-xl font-semibold mb-2">{value.title}</h4>
+                    <p className="text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
