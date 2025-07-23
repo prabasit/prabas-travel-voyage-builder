@@ -58,7 +58,7 @@ const Hero = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
               <CardContent className="p-4 text-center">
                 <Users className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">50K+</div>
@@ -66,7 +66,7 @@ const Hero = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
               <CardContent className="p-4 text-center">
                 <MapPin className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">100+</div>
@@ -74,7 +74,7 @@ const Hero = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
               <CardContent className="p-4 text-center">
                 <Star className="h-8 w-8 mx-auto mb-2 text-accent" />
                 <div className="text-2xl font-bold">4.9</div>
