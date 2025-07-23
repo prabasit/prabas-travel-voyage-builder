@@ -335,6 +335,53 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          applicant_email: string
+          applicant_name: string
+          applicant_phone: string | null
+          career_id: string | null
+          cover_letter: string
+          created_at: string | null
+          id: string
+          position_title: string
+          resume_url: string | null
+          status: string | null
+        }
+        Insert: {
+          applicant_email: string
+          applicant_name: string
+          applicant_phone?: string | null
+          career_id?: string | null
+          cover_letter: string
+          created_at?: string | null
+          id?: string
+          position_title: string
+          resume_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          applicant_email?: string
+          applicant_name?: string
+          applicant_phone?: string | null
+          career_id?: string | null
+          cover_letter?: string
+          created_at?: string | null
+          id?: string
+          position_title?: string
+          resume_url?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_career_id_fkey"
+            columns: ["career_id"]
+            isOneToOne: false
+            referencedRelation: "careers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pages: {
         Row: {
           content: string | null

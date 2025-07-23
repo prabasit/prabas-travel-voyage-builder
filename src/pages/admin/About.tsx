@@ -1,93 +1,165 @@
 
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, X } from 'lucide-react';
+
+interface AboutData {
+  id: string;
+  title: string;
+  description: string;
+  story: string;
+  mission: string;
+  vision: string;
+  values: any[];
+  stats: any[];
+  image_url: string;
+}
 
 const About = () => {
-  const [formData, setFormData] = useState({
+  const [aboutData, setAboutData] = useState<AboutData>({
+    id: '',
     title: '',
     description: '',
     story: '',
     mission: '',
     vision: '',
-    values: '',
-    stats: '',
+    values: [],
+    stats: [],
     image_url: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: aboutData, isLoading } = useQuery({
-    queryKey: ['about-us'],
-    queryFn: async () => {
+  useEffect(() => {
+    fetchAboutData();
+  }, []);
+
+  const fetchAboutData = async () => {
+    try {
       const { data, error } = await supabase
         .from('about_us')
         .select('*')
+        .limit(1)
         .single();
-      
+
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
-    }
-  });
-
-  useEffect(() => {
-    if (aboutData) {
-      setFormData({
-        title: aboutData.title || '',
-        description: aboutData.description || '',
-        story: aboutData.story || '',
-        mission: aboutData.mission || '',
-        vision: aboutData.vision || '',
-        values: Array.isArray(aboutData.values) ? aboutData.values.join(', ') : '',
-        stats: aboutData.stats ? JSON.stringify(aboutData.stats, null, 2) : '',
-        image_url: aboutData.image_url || ''
-      });
-    }
-  }, [aboutData]);
-
-  const updateAboutMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const processedData = {
-        ...data,
-        values: data.values ? data.values.split(',').map((v: string) => v.trim()) : [],
-        stats: data.stats ? JSON.parse(data.stats) : {}
-      };
-
-      const { data: result, error } = await supabase
-        .from('about_us')
-        .upsert(processedData)
-        .select()
-        .single();
       
-      if (error) throw error;
-      return result;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['about-us'] });
-      toast({ title: 'About Us updated successfully' });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error updating About Us',
-        description: error.message,
-        variant: 'destructive'
-      });
+      if (data) {
+        setAboutData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching about data:', error);
+    } finally {
+      setLoading(false);
     }
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateAboutMutation.mutate(formData);
   };
 
-  if (isLoading) {
+  const handleInputChange = (field: string, value: any) => {
+    setAboutData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addValue = () => {
+    setAboutData(prev => ({
+      ...prev,
+      values: [...prev.values, { title: '', description: '' }]
+    }));
+  };
+
+  const updateValue = (index: number, field: string, value: string) => {
+    setAboutData(prev => ({
+      ...prev,
+      values: prev.values.map((val, i) => 
+        i === index ? { ...val, [field]: value } : val
+      )
+    }));
+  };
+
+  const removeValue = (index: number) => {
+    setAboutData(prev => ({
+      ...prev,
+      values: prev.values.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addStat = () => {
+    setAboutData(prev => ({
+      ...prev,
+      stats: [...prev.stats, { number: '', label: '' }]
+    }));
+  };
+
+  const updateStat = (index: number, field: string, value: string) => {
+    setAboutData(prev => ({
+      ...prev,
+      stats: prev.stats.map((stat, i) => 
+        i === index ? { ...stat, [field]: value } : stat
+      )
+    }));
+  };
+
+  const removeStat = (index: number) => {
+    setAboutData(prev => ({
+      ...prev,
+      stats: prev.stats.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const dataToSave = {
+        ...aboutData,
+        updated_at: new Date().toISOString()
+      };
+
+      if (aboutData.id) {
+        const { error } = await supabase
+          .from('about_us')
+          .update(dataToSave)
+          .eq('id', aboutData.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('about_us')
+          .insert([dataToSave]);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "About Us information saved successfully!",
+      });
+      
+      fetchAboutData();
+    } catch (error) {
+      console.error('Error saving about data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save about information. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
@@ -102,103 +174,169 @@ const About = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">About Us Management</h1>
-          <p className="text-muted-foreground">Manage your company's about page content</p>
+          <p className="text-muted-foreground">Manage your about us page content</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>About Us Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
+                  value={aboutData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="About Flights Nepal"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={aboutData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Brief description about your company"
                   rows={3}
                 />
               </div>
-              
+
+              <FileUpload
+                onFileUpload={(url) => handleInputChange('image_url', url)}
+                currentFile={aboutData.image_url}
+                label="About Us Image"
+                acceptedTypes="image/*"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Story, Mission & Vision</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="story">Our Story</Label>
                 <Textarea
                   id="story"
-                  value={formData.story}
-                  onChange={(e) => setFormData({ ...formData, story: e.target.value })}
-                  rows={5}
+                  value={aboutData.story}
+                  onChange={(e) => handleInputChange('story', e.target.value)}
+                  placeholder="Tell your company's story"
+                  rows={4}
                 />
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="mission">Mission</Label>
-                  <Textarea
-                    id="mission"
-                    value={formData.mission}
-                    onChange={(e) => setFormData({ ...formData, mission: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vision">Vision</Label>
-                  <Textarea
-                    id="vision"
-                    value={formData.vision}
-                    onChange={(e) => setFormData({ ...formData, vision: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-              </div>
-              
+
               <div>
-                <Label htmlFor="values">Values (comma-separated)</Label>
-                <Input
-                  id="values"
-                  value={formData.values}
-                  onChange={(e) => setFormData({ ...formData, values: e.target.value })}
-                  placeholder="Trust & Safety, Personalized Service, Expert Guidance"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="stats">Statistics (JSON format)</Label>
+                <Label htmlFor="mission">Our Mission</Label>
                 <Textarea
-                  id="stats"
-                  value={formData.stats}
-                  onChange={(e) => setFormData({ ...formData, stats: e.target.value })}
-                  rows={5}
-                  placeholder='{"years": 25, "customers": 10000, "team": 50, "rating": 4.9}'
+                  id="mission"
+                  value={aboutData.mission}
+                  onChange={(e) => handleInputChange('mission', e.target.value)}
+                  placeholder="Your company's mission statement"
+                  rows={3}
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
+                <Label htmlFor="vision">Our Vision</Label>
+                <Textarea
+                  id="vision"
+                  value={aboutData.vision}
+                  onChange={(e) => handleInputChange('vision', e.target.value)}
+                  placeholder="Your company's vision statement"
+                  rows={3}
                 />
               </div>
-              
-              <Button type="submit" disabled={updateAboutMutation.isPending}>
-                {updateAboutMutation.isPending ? 'Updating...' : 'Update About Us'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Company Values
+                <Button type="button" onClick={addValue} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Value
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {aboutData.values.map((value, index) => (
+                <div key={index} className="flex gap-4 items-start">
+                  <div className="flex-1">
+                    <Input
+                      value={value.title}
+                      onChange={(e) => updateValue(index, 'title', e.target.value)}
+                      placeholder="Value title"
+                      className="mb-2"
+                    />
+                    <Textarea
+                      value={value.description}
+                      onChange={(e) => updateValue(index, 'description', e.target.value)}
+                      placeholder="Value description"
+                      rows={2}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeValue(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Company Statistics
+                <Button type="button" onClick={addStat} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Statistic
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {aboutData.stats.map((stat, index) => (
+                <div key={index} className="flex gap-4 items-center">
+                  <Input
+                    value={stat.number}
+                    onChange={(e) => updateStat(index, 'number', e.target.value)}
+                    placeholder="10K+"
+                    className="flex-1"
+                  />
+                  <Input
+                    value={stat.label}
+                    onChange={(e) => updateStat(index, 'label', e.target.value)}
+                    placeholder="Happy Customers"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeStat(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
       </div>
     </AdminLayout>
   );

@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload } from 'lucide-react';
 
 interface Career {
   id: string;
@@ -43,9 +43,25 @@ const CareerApplicationModal = ({ isOpen, onClose, career }: CareerApplicationMo
     }));
   };
 
+  const handleFileUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      resume_url: url
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!career) return;
+
+    if (!formData.name || !formData.email || !formData.cover_letter) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -162,19 +178,12 @@ const CareerApplicationModal = ({ isOpen, onClose, career }: CareerApplicationMo
               />
             </div>
 
-            <div>
-              <Label htmlFor="resume_url">Resume/CV URL</Label>
-              <Input
-                id="resume_url"
-                name="resume_url"
-                value={formData.resume_url}
-                onChange={handleInputChange}
-                placeholder="https://drive.google.com/... or dropbox link"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Please provide a link to your resume (Google Drive, Dropbox, etc.)
-              </p>
-            </div>
+            <FileUpload
+              onFileUpload={handleFileUpload}
+              acceptedTypes=".pdf,.doc,.docx"
+              label="Resume/CV"
+              currentFile={formData.resume_url}
+            />
 
             <div className="flex justify-end space-x-3 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
