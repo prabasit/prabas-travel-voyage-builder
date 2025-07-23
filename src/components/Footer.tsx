@@ -66,10 +66,10 @@ const Footer = () => {
             
             <h4 className="text-lg font-semibold mb-4 mt-6">Popular Destinations</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Everest Base Camp</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Annapurna Circuit</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Kathmandu Valley</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Pokhara</a></li>
+              <li><a href="#" className="hover:text-yellow-400 transition-colors">Bali</a></li>
+              <li><a href="#" className="hover:text-yellow-400 transition-colors">Singapore</a></li>
+              <li><a href="#" className="hover:text-yellow-400 transition-colors">Europe</a></li>
+              <li><a href="#" className="hover:text-yellow-400 transition-colors">Nepal Tour</a></li>
             </ul>
           </div>
 
