@@ -40,7 +40,7 @@ const Hero = () => {
            <Link to="/prabas-holidays">
   <Button
           size="lg"
-          variant="outline" className="text-lg px-8 py-4 bg-accent hover:bg-accent/90"
+          variant="outline" className="text-lg px-8 py-4 border-orange-600 bg-accent hover:bg-accent/90"
        
             >
             Holiday Packages
