@@ -37,11 +37,15 @@ const Hero = () => {
                  Flights
               </Button>
             </Link>
-            <Link to="/prabas-holidays">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-orange hover:bg-white hover:text-black">
-                Holiday Packages
-              </Button>
-            </Link>
+           <Link to="/prabas-holidays">
+  <Button
+    size="lg"
+    variant="outline"
+    className="text-lg px-8 py-4 border-blue-600 text-white bg-blue-600 hover:bg-blue-500/80 hover:text-white"
+  >
+    Holiday Packages
+  </Button>
+</Link>
           </div>
 
           {/* Quick Stats */}
