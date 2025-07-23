@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Edit, Trash2, Plus, Save, Eye } from 'lucide-react';
@@ -189,27 +190,27 @@ const BlogManagement = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Blog Management</h1>
+            <h1 className="text-3xl font-bold text-foreground">Blog Management</h1>
             <p className="text-muted-foreground">Manage your blog posts</p>
           </div>
-          <Button onClick={() => setIsCreating(true)}>
+          <Button onClick={() => setIsCreating(true)} className="bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Add Blog Post
           </Button>
         </div>
 
         {(isCreating || editingBlog) && (
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle>{editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'}</CardTitle>
+              <CardTitle className="text-card-foreground">{editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="title" className="text-foreground">Title</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -222,69 +223,72 @@ const BlogManagement = () => {
                       }));
                     }}
                     placeholder="Blog post title"
+                    className="bg-background text-foreground"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="slug">Slug</Label>
+                  <Label htmlFor="slug" className="text-foreground">Slug</Label>
                   <Input
                     id="slug"
                     value={formData.slug}
                     onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                     placeholder="blog-post-slug"
+                    className="bg-background text-foreground"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category" className="text-foreground">Category</Label>
                   <Input
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                     placeholder="Travel Tips, Trekking, etc."
+                    className="bg-background text-foreground"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="image_url">Featured Image URL</Label>
+                  <Label htmlFor="tags" className="text-foreground">Tags (comma-separated)</Label>
                   <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                    placeholder="nepal, trekking, adventure"
+                    className="bg-background text-foreground"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                  placeholder="nepal, trekking, adventure"
-                />
-              </div>
+              <FileUpload
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                currentFile={formData.image_url}
+                label="Featured Image"
+                acceptedTypes="image/*"
+              />
 
               <div>
-                <Label htmlFor="excerpt">Excerpt</Label>
+                <Label htmlFor="excerpt" className="text-foreground">Excerpt</Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
                   onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                   placeholder="Brief description of the blog post"
                   rows={3}
+                  className="bg-background text-foreground"
                 />
               </div>
 
               <div>
-                <Label htmlFor="content">Content</Label>
+                <Label htmlFor="content" className="text-foreground">Content</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
                   onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                   placeholder="Full blog post content (HTML supported)"
                   rows={10}
+                  className="bg-background text-foreground"
                 />
               </div>
 
@@ -294,11 +298,11 @@ const BlogManagement = () => {
                   checked={formData.is_published}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_published: checked }))}
                 />
-                <Label htmlFor="is_published">Published</Label>
+                <Label htmlFor="is_published" className="text-foreground">Published</Label>
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleSaveBlog}>
+                <Button onClick={handleSaveBlog} className="bg-primary hover:bg-primary/90">
                   <Save className="h-4 w-4 mr-2" />
                   Save Blog Post
                 </Button>
@@ -312,17 +316,26 @@ const BlogManagement = () => {
 
         <div className="grid gap-4">
           {blogs.map((blog) => (
-            <Card key={blog.id}>
+            <Card key={blog.id} className="bg-card">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-2">
-                      <h3 className="text-xl font-semibold">{blog.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        blog.is_published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {blog.is_published ? 'Published' : 'Draft'}
-                      </span>
+                      {blog.image_url && (
+                        <img
+                          src={blog.image_url}
+                          alt={blog.title}
+                          className="w-16 h-16 rounded object-cover"
+                        />
+                      )}
+                      <div>
+                        <h3 className="text-xl font-semibold text-card-foreground">{blog.title}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          blog.is_published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {blog.is_published ? 'Published' : 'Draft'}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-muted-foreground mb-2">{blog.excerpt}</p>
                     {blog.category && (
@@ -373,7 +386,7 @@ const BlogManagement = () => {
         </div>
 
         {blogs.length === 0 && (
-          <Card>
+          <Card className="bg-card">
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">No blog posts found. Create your first blog post to get started.</p>
             </CardContent>

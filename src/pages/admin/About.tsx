@@ -54,7 +54,11 @@ const About = () => {
       if (error && error.code !== 'PGRST116') throw error;
       
       if (data) {
-        setAboutData(data);
+        setAboutData({
+          ...data,
+          values: Array.isArray(data.values) ? data.values : [],
+          stats: Array.isArray(data.stats) ? data.stats : []
+        });
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
@@ -171,36 +175,38 @@ const About = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold">About Us Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">About Us Management</h1>
           <p className="text-muted-foreground">Manage your about us page content</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-card-foreground">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title" className="text-foreground">Title</Label>
                 <Input
                   id="title"
                   value={aboutData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="About Flights Nepal"
+                  placeholder="About Prabas Travels"
+                  className="bg-background text-foreground"
                 />
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-foreground">Description</Label>
                 <Textarea
                   id="description"
                   value={aboutData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Brief description about your company"
                   rows={3}
+                  className="bg-background text-foreground"
                 />
               </div>
 
@@ -213,51 +219,54 @@ const About = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle>Story, Mission & Vision</CardTitle>
+              <CardTitle className="text-card-foreground">Story, Mission & Vision</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="story">Our Story</Label>
+                <Label htmlFor="story" className="text-foreground">Our Story</Label>
                 <Textarea
                   id="story"
                   value={aboutData.story}
                   onChange={(e) => handleInputChange('story', e.target.value)}
                   placeholder="Tell your company's story"
                   rows={4}
+                  className="bg-background text-foreground"
                 />
               </div>
 
               <div>
-                <Label htmlFor="mission">Our Mission</Label>
+                <Label htmlFor="mission" className="text-foreground">Our Mission</Label>
                 <Textarea
                   id="mission"
                   value={aboutData.mission}
                   onChange={(e) => handleInputChange('mission', e.target.value)}
                   placeholder="Your company's mission statement"
                   rows={3}
+                  className="bg-background text-foreground"
                 />
               </div>
 
               <div>
-                <Label htmlFor="vision">Our Vision</Label>
+                <Label htmlFor="vision" className="text-foreground">Our Vision</Label>
                 <Textarea
                   id="vision"
                   value={aboutData.vision}
                   onChange={(e) => handleInputChange('vision', e.target.value)}
                   placeholder="Your company's vision statement"
                   rows={3}
+                  className="bg-background text-foreground"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-card-foreground">
                 Company Values
-                <Button type="button" onClick={addValue} size="sm">
+                <Button type="button" onClick={addValue} size="sm" className="bg-primary hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Value
                 </Button>
@@ -265,19 +274,20 @@ const About = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {aboutData.values.map((value, index) => (
-                <div key={index} className="flex gap-4 items-start">
+                <div key={index} className="flex gap-4 items-start p-4 bg-muted rounded-lg">
                   <div className="flex-1">
                     <Input
                       value={value.title}
                       onChange={(e) => updateValue(index, 'title', e.target.value)}
                       placeholder="Value title"
-                      className="mb-2"
+                      className="mb-2 bg-background text-foreground"
                     />
                     <Textarea
                       value={value.description}
                       onChange={(e) => updateValue(index, 'description', e.target.value)}
                       placeholder="Value description"
                       rows={2}
+                      className="bg-background text-foreground"
                     />
                   </div>
                   <Button
@@ -285,6 +295,7 @@ const About = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => removeValue(index)}
+                    className="hover:bg-destructive hover:text-destructive-foreground"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -293,11 +304,11 @@ const About = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-card-foreground">
                 Company Statistics
-                <Button type="button" onClick={addStat} size="sm">
+                <Button type="button" onClick={addStat} size="sm" className="bg-primary hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Statistic
                 </Button>
@@ -305,24 +316,25 @@ const About = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {aboutData.stats.map((stat, index) => (
-                <div key={index} className="flex gap-4 items-center">
+                <div key={index} className="flex gap-4 items-center p-4 bg-muted rounded-lg">
                   <Input
                     value={stat.number}
                     onChange={(e) => updateStat(index, 'number', e.target.value)}
                     placeholder="10K+"
-                    className="flex-1"
+                    className="flex-1 bg-background text-foreground"
                   />
                   <Input
                     value={stat.label}
                     onChange={(e) => updateStat(index, 'label', e.target.value)}
                     placeholder="Happy Customers"
-                    className="flex-1"
+                    className="flex-1 bg-background text-foreground"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => removeStat(index)}
+                    className="hover:bg-destructive hover:text-destructive-foreground"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -332,7 +344,7 @@ const About = () => {
           </Card>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>

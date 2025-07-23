@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Edit, Trash2, Plus, Save, Star } from 'lucide-react';
@@ -21,6 +22,8 @@ interface Testimonial {
   rating: number;
   is_featured: boolean;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const TestimonialsManagement = () => {
@@ -171,108 +174,101 @@ const TestimonialsManagement = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Testimonials Management</h1>
+            <h1 className="text-3xl font-bold text-foreground">Testimonials Management</h1>
             <p className="text-muted-foreground">Manage customer testimonials</p>
           </div>
-          <Button onClick={() => setIsCreating(true)}>
+          <Button onClick={() => setIsCreating(true)} className="bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Add Testimonial
           </Button>
         </div>
 
         {(isCreating || editingTestimonial) && (
-          <Card>
+          <Card className="bg-card">
             <CardHeader>
-              <CardTitle>{editingTestimonial ? 'Edit Testimonial' : 'Create New Testimonial'}</CardTitle>
+              <CardTitle className="text-card-foreground">
+                {editingTestimonial ? 'Edit Testimonial' : 'Create New Testimonial'}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="client_name">Client Name</Label>
+                  <Label htmlFor="client_name" className="text-foreground">Client Name</Label>
                   <Input
                     id="client_name"
                     value={formData.client_name}
                     onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
-                    placeholder="Client's full name"
+                    placeholder="Client full name"
+                    className="bg-background text-foreground"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="client_location">Location</Label>
+                  <Label htmlFor="client_location" className="text-foreground">Client Location</Label>
                   <Input
                     id="client_location"
                     value={formData.client_location}
                     onChange={(e) => setFormData(prev => ({ ...prev, client_location: e.target.value }))}
-                    placeholder="Client's location"
+                    placeholder="City, Country"
+                    className="bg-background text-foreground"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="trip_type">Trip Type</Label>
+                  <Label htmlFor="trip_type" className="text-foreground">Trip Type</Label>
                   <Input
                     id="trip_type"
                     value={formData.trip_type}
                     onChange={(e) => setFormData(prev => ({ ...prev, trip_type: e.target.value }))}
-                    placeholder="e.g., Everest Base Camp Trek"
+                    placeholder="Everest Base Camp Trek"
+                    className="bg-background text-foreground"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="client_image_url">Client Image URL</Label>
+                  <Label htmlFor="rating" className="text-foreground">Rating (1-5)</Label>
                   <Input
-                    id="client_image_url"
-                    value={formData.client_image_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, client_image_url: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
+                    id="rating"
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={formData.rating}
+                    onChange={(e) => setFormData(prev => ({ ...prev, rating: parseInt(e.target.value) }))}
+                    className="bg-background text-foreground"
                   />
                 </div>
               </div>
 
+              <FileUpload
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, client_image_url: url }))}
+                currentFile={formData.client_image_url}
+                label="Client Photo"
+                acceptedTypes="image/*"
+              />
+
               <div>
-                <Label htmlFor="testimonial_text">Testimonial</Label>
+                <Label htmlFor="testimonial_text" className="text-foreground">Testimonial Text</Label>
                 <Textarea
                   id="testimonial_text"
                   value={formData.testimonial_text}
                   onChange={(e) => setFormData(prev => ({ ...prev, testimonial_text: e.target.value }))}
-                  placeholder="Client's testimonial text"
+                  placeholder="Client's testimonial..."
                   rows={4}
+                  className="bg-background text-foreground"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="rating">Rating</Label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      id="rating"
-                      type="number"
-                      min="1"
-                      max="5"
-                      value={formData.rating}
-                      onChange={(e) => setFormData(prev => ({ ...prev, rating: parseInt(e.target.value) || 5 }))}
-                    />
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`h-5 w-5 ${
-                            star <= formData.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_featured"
                     checked={formData.is_featured}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
                   />
-                  <Label htmlFor="is_featured">Featured</Label>
+                  <Label htmlFor="is_featured" className="text-foreground">Featured</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -280,12 +276,12 @@ const TestimonialsManagement = () => {
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
-                  <Label htmlFor="is_active">Active</Label>
+                  <Label htmlFor="is_active" className="text-foreground">Active</Label>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleSaveTestimonial}>
+                <Button onClick={handleSaveTestimonial} className="bg-primary hover:bg-primary/90">
                   <Save className="h-4 w-4 mr-2" />
                   Save Testimonial
                 </Button>
@@ -299,39 +295,48 @@ const TestimonialsManagement = () => {
 
         <div className="grid gap-4">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id}>
+            <Card key={testimonial.id} className="bg-card">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-2">
-                      <h3 className="text-xl font-semibold">{testimonial.client_name}</h3>
-                      <span className="text-muted-foreground">from {testimonial.client_location}</span>
+                      {testimonial.client_image_url && (
+                        <img
+                          src={testimonial.client_image_url}
+                          alt={testimonial.client_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      )}
+                      <div>
+                        <h3 className="text-xl font-semibold text-card-foreground">{testimonial.client_name}</h3>
+                        <p className="text-muted-foreground">{testimonial.client_location}</p>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground mb-2">"{testimonial.testimonial_text}"</p>
+                    <div className="flex items-center gap-4">
                       <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[...Array(5)].map((_, i) => (
                           <Star
-                            key={star}
+                            key={i}
                             className={`h-4 w-4 ${
-                              star <= testimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              i < testimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
                             }`}
                           />
                         ))}
                       </div>
-                    </div>
-                    <p className="text-muted-foreground mb-2 italic">"{testimonial.testimonial_text}"</p>
-                    {testimonial.trip_type && (
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        {testimonial.trip_type}
-                      </span>
-                    )}
-                    <div className="flex gap-2 mt-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        testimonial.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {testimonial.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      {testimonial.trip_type && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                          {testimonial.trip_type}
+                        </span>
+                      )}
                       {testimonial.is_featured && (
-                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
                           Featured
+                        </span>
+                      )}
+                      {!testimonial.is_active && (
+                        <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
+                          Inactive
                         </span>
                       )}
                     </div>
@@ -359,7 +364,7 @@ const TestimonialsManagement = () => {
         </div>
 
         {testimonials.length === 0 && (
-          <Card>
+          <Card className="bg-card">
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">No testimonials found. Create your first testimonial to get started.</p>
             </CardContent>
