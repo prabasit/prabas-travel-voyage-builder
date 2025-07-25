@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -20,10 +21,9 @@ const ContactSection = () => {
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [e.target.name]: e.target.value
     }));
   };
 
@@ -39,59 +39,41 @@ const ContactSection = () => {
       return;
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
+    console.log('Form submitted:', formData);
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('inquiries')
         .insert([{
-          name: formData.name.trim(),
-          email: formData.email.toLowerCase().trim(),
-          phone: formData.phone.trim() || null,
-          subject: formData.subject.trim(),
-          message: formData.message.trim(),
-          status: 'pending'
-        }])
-        .select();
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message
+        }]);
 
-      if (error) {
-        console.error('Contact form error:', error);
-        toast({
-          title: "Submission Failed",
-          description: "Failed to send your message. Please try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Message Sent!",
-          description: "Thank you for your inquiry. We'll get back to you soon.",
-        });
-        
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: ''
-        });
-      }
-    } catch (error) {
-      console.error('Contact form error:', error);
+      if (error) throw error;
+
       toast({
-        title: "Submission Failed",
-        description: "Failed to send your message. Please try again.",
+        title: "Message Sent",
+        description: "Your message has been sent successfully. We'll get back to you soon!",
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+
+    } catch (error) {
+      console.error('Error submitting inquiry:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -100,103 +82,136 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="py-12 md:py-20 bg-background">
+    <section id="contact" className="py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-foreground">Get In Touch</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-foreground">Get in Touch</h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Ready to start your journey? Contact us today and let's plan your perfect adventure together.
+            Ready to start your Nepal adventure? Contact us today for personalized travel planning and expert guidance.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12">
+          {/* Contact Information */}
+          <div className="space-y-6 md:space-y-8">
+            <Card className="bg-card hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center text-card-foreground">
+                  <Mail className="h-5 w-5 mr-2 text-primary" />
+                  Email Us
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-2">info@prabastravel.com</p>
+                <p className="text-muted-foreground">We'll respond within 24 hours</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center text-card-foreground">
+                  <Phone className="h-5 w-5 mr-2 text-primary" />
+                  Call Us
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-2">+977-1-4700000</p>
+                <p className="text-muted-foreground">Available 24/7 for emergencies</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center text-card-foreground">
+                  <MapPin className="h-5 w-5 mr-2 text-primary" />
+                  Visit Us
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-2">Chhaya Center, Thamel</p>
+                <p className="text-muted-foreground">Kathmandu, Nepal</p>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Contact Form */}
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-card-foreground">Send us a Message</CardTitle>
+              <CardTitle className="text-card-foreground">Send us a Message</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-card-foreground mb-1">
-                      Name *
-                    </label>
+                    <Label htmlFor="name" className="text-foreground">Full Name *</Label>
                     <Input
                       id="name"
                       name="name"
-                      type="text"
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Your full name"
                       required
-                      className="bg-background text-foreground"
+                      className="bg-background text-foreground border-input"
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-card-foreground mb-1">
-                      Email *
-                    </label>
+                    <Label htmlFor="email" className="text-foreground">Email Address *</Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="your@email.com"
+                      placeholder="your.email@example.com"
                       required
-                      className="bg-background text-foreground"
+                      className="bg-background text-foreground border-input"
                     />
                   </div>
                 </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-card-foreground mb-1">
-                    Phone
-                  </label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="Your phone number"
-                    className="bg-background text-foreground"
-                  />
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+977-9800000000"
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject" className="text-foreground">Subject *</Label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="What's this about?"
+                      required
+                      className="bg-background text-foreground border-input"
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-card-foreground mb-1">
-                    Subject *
-                  </label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    type="text"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    placeholder="What's this about?"
-                    required
-                    className="bg-background text-foreground"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-card-foreground mb-1">
-                    Message *
-                  </label>
+                  <Label htmlFor="message" className="text-foreground">Message *</Label>
                   <Textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Tell us about your travel plans, requirements, or any questions you have..."
-                    rows={5}
+                    placeholder="Tell us about your travel plans, questions, or how we can help you..."
+                    className="min-h-[120px] bg-background text-foreground border-input"
                     required
-                    className="bg-background text-foreground"
                   />
                 </div>
+
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={isSubmitting}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isSubmitting ? (
                     <>
@@ -204,80 +219,15 @@ const ContactSection = () => {
                       Sending...
                     </>
                   ) : (
-                    'Send Message'
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Message
+                    </>
                   )}
                 </Button>
               </form>
             </CardContent>
           </Card>
-
-          {/* Contact Information */}
-          <div className="space-y-6">
-            <Card className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Phone className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-card-foreground">Phone</h3>
-                    <p className="text-muted-foreground">+977-1-4444444</p>
-                    <p className="text-muted-foreground">+977-9841234567</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-card-foreground">Email</h3>
-                    <p className="text-muted-foreground">info@prabastravels.com</p>
-                    <p className="text-muted-foreground">booking@prabastravels.com</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <MapPin className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-card-foreground">Address</h3>
-                    <p className="text-muted-foreground">
-                      Thamel, Kathmandu<br />
-                      Nepal
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Clock className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-card-foreground">Office Hours</h3>
-                    <p className="text-muted-foreground">
-                      Mon - Fri: 9:00 AM - 6:00 PM<br />
-                      Sat: 9:00 AM - 4:00 PM<br />
-                      Sun: Closed
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </section>

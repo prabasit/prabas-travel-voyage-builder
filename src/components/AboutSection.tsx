@@ -30,21 +30,21 @@ const AboutSection = () => {
       const { data, error } = await supabase
         .from('about_us')
         .select('*')
-        .limit(1);
+        .limit(1)
+        .single();
 
       if (error) {
         console.error('Error fetching about data:', error);
+        // Use fallback data
         setAboutData(getFallbackData());
-      } else if (data && data.length > 0) {
-        // Process the data to ensure values and stats are arrays
+      } else {
+        // Ensure arrays are properly formatted
         const processedData = {
-          ...data[0],
-          values: data[0].values || getFallbackData().values,
-          stats: data[0].stats || getFallbackData().stats
+          ...data,
+          values: Array.isArray(data.values) ? data.values : (data.values ? JSON.parse(data.values) : []),
+          stats: Array.isArray(data.stats) ? data.stats : (data.stats ? JSON.parse(data.stats) : [])
         };
         setAboutData(processedData);
-      } else {
-        setAboutData(getFallbackData());
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
