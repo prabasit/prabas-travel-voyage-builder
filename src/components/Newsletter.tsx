@@ -24,14 +24,31 @@ const Newsletter = () => {
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubscribing(true);
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('newsletter_subscriptions')
-        .insert([{ email }]);
+        .insert([{ 
+          email: email.toLowerCase().trim(),
+          subscribed_at: new Date().toISOString(),
+          is_active: true
+        }])
+        .select();
 
       if (error) {
+        console.error('Newsletter subscription error:', error);
         if (error.code === '23505') {
           toast({
             title: "Already Subscribed",
@@ -39,7 +56,11 @@ const Newsletter = () => {
             variant: "destructive",
           });
         } else {
-          throw error;
+          toast({
+            title: "Subscription Failed",
+            description: "Failed to subscribe. Please try again.",
+            variant: "destructive",
+          });
         }
       } else {
         toast({

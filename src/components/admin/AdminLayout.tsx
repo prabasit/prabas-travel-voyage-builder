@@ -26,24 +26,34 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminData, setAdminData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if admin is already logged in
-    const adminSession = localStorage.getItem('admin_session');
-    if (adminSession) {
-      try {
-        const parsedData = JSON.parse(adminSession);
-        setAdminData(parsedData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing admin session:', error);
-        localStorage.removeItem('admin_session');
-      }
-    }
+    checkAuthStatus();
   }, []);
 
+  const checkAuthStatus = () => {
+    try {
+      const adminSession = localStorage.getItem('admin_session');
+      console.log('Checking admin session:', adminSession);
+      
+      if (adminSession) {
+        const parsedData = JSON.parse(adminSession);
+        console.log('Parsed admin data:', parsedData);
+        setAdminData(parsedData);
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      localStorage.removeItem('admin_session');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = (adminData: any) => {
+    console.log('Login successful, admin data:', adminData);
     setAdminData(adminData);
     setIsAuthenticated(true);
   };
@@ -54,6 +64,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     setAdminData(null);
     navigate('/admin/login');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <AdminAuth onLogin={handleLogin} />;
@@ -84,7 +102,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold">Admin Panel</h2>
               <p className="text-sm text-muted-foreground">
-                Welcome, {adminData?.email}
+                Welcome, {adminData?.email || 'Admin'}
               </p>
             </div>
             <SidebarGroup>

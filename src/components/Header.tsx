@@ -1,165 +1,163 @@
 
 import React, { useState } from 'react';
-import { Menu, X, ChevronDown, Phone, Mail } from 'lucide-react';
+import { Menu, X, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const businessMenuItems = [
-    { name: 'Prabas Holidays', href: '/prabas-holidays' },
-    { name: 'Flights Nepal', href: '/flights-nepal' },
-  ];
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
-    <header className="bg-white shadow-lg fixed w-full top-0 z-50">
-      {/* Top Contact Bar */}
-      <div className="bg-primary text-primary-foreground py-2">
-        <div className="container mx-auto px-4 flex justify-between items-center text-sm">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <Phone className="h-4 w-4" />
-              <span>+977-1-4445566</span>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="container mx-auto px-4">
+        {/* Top contact bar */}
+        <div className="hidden lg:flex items-center justify-between py-2 text-sm border-b border-border">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-2">
+              <Phone className="h-4 w-4 text-primary" />
+              <span className="text-muted-foreground">+977-1-4444444</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <Mail className="h-4 w-4" />
-              <span>info@prabastravel.com</span>
+            <div className="flex items-center space-x-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <span className="text-muted-foreground">info@prabastravels.com</span>
             </div>
           </div>
-          <div className="hidden md:block">
-            <span>Your Trusted Travel Partner Since 1995</span>
+          <div className="text-muted-foreground">
+            Your trusted travel partner since 2010
           </div>
         </div>
-      </div>
 
-      {/* Main Navigation */}
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <Link to="/">
-              <img 
-                src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
-                alt="Prabas Travels Logo" 
-                className="h-16 w-auto object-contain"
-              />
-            </Link>
+        {/* Main navigation */}
+        <nav className="flex items-center justify-between py-3 md:py-4">
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
+              alt="Prabas Travels" 
+              className="h-10 md:h-12 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <Link to="/" className="px-4 py-2 hover:text-primary transition-colors">
-                    Home
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <Link to="/about" className="px-4 py-2 hover:text-primary transition-colors">
-                    About Us
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Our Businesses</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-64 p-4">
-                      {businessMenuItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/team" className="px-4 py-2 hover:text-primary transition-colors">
-                    Our Team
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/careers" className="px-4 py-2 hover:text-primary transition-colors">
-                    Careers
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/testimonials" className="px-4 py-2 hover:text-primary transition-colors">
-                    Testimonials
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/blog" className="px-4 py-2 hover:text-primary transition-colors">
-                    Blog
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/inquiries" className="px-4 py-2 hover:text-primary transition-colors">
-                    Inquiries
-                  </Link>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-
-            <Button className="bg-accent hover:bg-accent/90">Get Quote</Button>
+            <a href="/" className="text-foreground hover:text-primary transition-colors font-medium">
+              Home
+            </a>
+            <a href="/about" className="text-foreground hover:text-primary transition-colors font-medium">
+              About
+            </a>
+            <a href="/services" className="text-foreground hover:text-primary transition-colors font-medium">
+              Services
+            </a>
+            <a href="/team" className="text-foreground hover:text-primary transition-colors font-medium">
+              Team
+            </a>
+            <a href="/blog" className="text-foreground hover:text-primary transition-colors font-medium">
+              Blog
+            </a>
+            <a href="/testimonials" className="text-foreground hover:text-primary transition-colors font-medium">
+              Testimonials
+            </a>
+            <a href="/careers" className="text-foreground hover:text-primary transition-colors font-medium">
+              Careers
+            </a>
+            <a href="/inquiries" className="text-foreground hover:text-primary transition-colors font-medium">
+              Contact
+            </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setIsOpen(!isOpen)}
+          {/* CTA Button - Desktop */}
+          <div className="hidden lg:block">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Get Quote
+            </Button>
+          </div>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={toggleMenu}
+            className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            aria-label="Toggle menu"
           >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
-        </div>
+            {isMenuOpen ? (
+              <X className="h-6 w-6 text-foreground" />
+            ) : (
+              <Menu className="h-6 w-6 text-foreground" />
+            )}
+          </button>
+        </nav>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-border">
-            <div className="space-y-2 pt-4">
-              <Link to="/" className="block px-4 py-2 hover:bg-accent rounded-md">Home</Link>
-              <Link to="/about" className="block px-4 py-2 hover:bg-accent rounded-md">About Us</Link>
-              
+        {isMenuOpen && (
+          <div className="lg:hidden border-t border-border">
+            <div className="py-4 space-y-3">
+              <a 
+                href="/" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </a>
+              <a 
+                href="/about" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </a>
+              <a 
+                href="/services" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Services
+              </a>
+              <a 
+                href="/team" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Team
+              </a>
+              <a 
+                href="/blog" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
+              </a>
+              <a 
+                href="/testimonials" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Testimonials
+              </a>
+              <a 
+                href="/careers" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Careers
+              </a>
+              <a 
+                href="/inquiries" 
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </a>
               <div className="px-4 py-2">
-                <span className="font-semibold">Our Businesses</span>
-                <div className="ml-4 mt-2 space-y-1">
-                  {businessMenuItems.map((item) => (
-                    <Link key={item.name} to={item.href} className="block py-1 text-sm hover:text-primary">
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Get Quote
+                </Button>
               </div>
-              
-              <Link to="/team" className="block px-4 py-2 hover:bg-accent rounded-md">Our Team</Link>
-              <Link to="/careers" className="block px-4 py-2 hover:bg-accent rounded-md">Careers</Link>
-              <Link to="/testimonials" className="block px-4 py-2 hover:bg-accent rounded-md">Testimonials</Link>
-              <Link to="/blog" className="block px-4 py-2 hover:bg-accent rounded-md">Blog</Link>
-              <Link to="/inquiries" className="block px-4 py-2 hover:bg-accent rounded-md">Inquiries</Link>
             </div>
           </div>
         )}
-      </nav>
+      </div>
     </header>
   );
 };
