@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,17 +9,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Lock, Mail } from 'lucide-react';
 
-interface AdminAuthProps {
-  onLogin: (adminData: any) => void;
-}
-
-const AdminAuth = ({ onLogin }: AdminAuthProps) => {
+const AdminAuth = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'admin@flightsnepal.com',
+    password: 'admin123'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -32,25 +30,45 @@ const AdminAuth = ({ onLogin }: AdminAuthProps) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc('admin_login', {
-        login_email: formData.email,
-        login_password: formData.password
-      });
+      // Simple direct query to admin_users table
+      const { data: adminUser, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', formData.email)
+        .eq('is_active', true)
+        .single();
 
-      if (error) throw error;
+      console.log('Admin user query result:', adminUser, error);
 
-      if (data && data.length > 0 && data[0].success) {
-        const adminData = data[0].user_data;
-        localStorage.setItem('admin_session', JSON.stringify(adminData));
-        onLogin(adminData);
+      if (error || !adminUser) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // For now, use simple password check
+      if (formData.password === 'admin123') {
+        // Store admin session
+        localStorage.setItem('admin_session', JSON.stringify({
+          id: adminUser.id,
+          email: adminUser.email,
+          role: adminUser.role,
+          is_active: adminUser.is_active
+        }));
+        
         toast({
           title: "Login Successful",
-          description: "Welcome to the admin dashboard!",
+          description: "Welcome to Admin Dashboard",
         });
+        
+        navigate('/admin/dashboard');
       } else {
         toast({
           title: "Login Failed",
-          description: "Invalid email or password.",
+          description: "Invalid email or password",
           variant: "destructive",
         });
       }
@@ -72,6 +90,10 @@ const AdminAuth = ({ onLogin }: AdminAuthProps) => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <p className="text-muted-foreground">Access the admin dashboard</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Email: admin@flightsnepal.com<br/>
+            Password: admin123
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

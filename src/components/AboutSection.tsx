@@ -34,15 +34,14 @@ const AboutSection = () => {
         .single();
 
       if (error) {
-        console.error('Error fetching about data:', error);
-        // Use fallback data
+        console.log('No about_us data found, using fallback');
         setAboutData(getFallbackData());
       } else {
         // Ensure arrays are properly formatted
         const processedData = {
           ...data,
-          values: Array.isArray(data.values) ? data.values : (data.values ? JSON.parse(data.values) : []),
-          stats: Array.isArray(data.stats) ? data.stats : (data.stats ? JSON.parse(data.stats) : [])
+          values: Array.isArray(data.values) ? data.values : [],
+          stats: Array.isArray(data.stats) ? data.stats : []
         };
         setAboutData(processedData);
       }
@@ -89,9 +88,6 @@ const AboutSection = () => {
   }
 
   if (!aboutData) return null;
-
-  const statsArray = Array.isArray(aboutData.stats) ? aboutData.stats : [];
-  const valuesArray = Array.isArray(aboutData.values) ? aboutData.values : [];
 
   const getValueIcon = (index: number) => {
     const icons = [Award, Globe, Heart, Users];
@@ -144,9 +140,9 @@ const AboutSection = () => {
         </div>
 
         {/* Stats Section */}
-        {statsArray.length > 0 && (
+        {aboutData.stats.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16">
-            {statsArray.map((stat, index) => (
+            {aboutData.stats.map((stat, index) => (
               <div key={index} className="text-center p-4 md:p-6 bg-muted/50 rounded-lg">
                 <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">{stat.number}</div>
                 <div className="text-muted-foreground text-sm md:text-base">{stat.label}</div>
@@ -156,24 +152,22 @@ const AboutSection = () => {
         )}
 
         {/* Values Section */}
-        {valuesArray.length > 0 && (
-          <div>
-            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12 text-foreground">Our Values</h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-              {valuesArray.map((value, index) => (
-                <Card key={index} className="text-center bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6 md:p-8">
-                    <div className="mb-4 md:mb-6">
-                      {getValueIcon(index)}
-                    </div>
-                    <h4 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 text-card-foreground">{value.title}</h4>
-                    <p className="text-muted-foreground text-sm md:text-base">{value.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <div>
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12 text-foreground">Our Values</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {aboutData.values.map((value, index) => (
+              <Card key={index} className="text-center bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardContent className="p-6 md:p-8">
+                  <div className="mb-4 md:mb-6">
+                    {getValueIcon(index)}
+                  </div>
+                  <h4 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 text-card-foreground">{value.title}</h4>
+                  <p className="text-muted-foreground text-sm md:text-base">{value.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
