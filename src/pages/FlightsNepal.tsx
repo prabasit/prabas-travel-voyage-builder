@@ -1,38 +1,129 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plane, Clock, Shield, MapPin, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface FlightFeature {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+interface FlightsNepalData {
+  id: string;
+  title: string;
+  description: string;
+  features: FlightFeature[];
+  hero_image_url: string;
+}
 
 const FlightsNepal = () => {
-  const features = [
-    {
-      icon: Plane,
-      title: 'Domestic & International Flights',
-      description: 'Complete flight booking services for all destinations across Nepal and worldwide'
-    },
-    {
-      icon: Clock,
-      title: 'Real-time Booking System',
-      description: 'Advanced ticketing system with instant confirmation and e-tickets'
-    },
-    {
-      icon: Shield,
-      title: 'Secure Payment',
-      description: 'Safe and secure payment gateway with multiple payment options'
-    },
-    {
-      icon: MapPin,
-      title: 'All Airlines',
-      description: 'Partner with all major domestic and international airlines'
+  const [data, setData] = useState<FlightsNepalData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const { data: flightsData, error } = await supabase
+        .from('flights_nepal')
+        .select('*')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      
+      if (flightsData) {
+        setData({
+          ...flightsData,
+          features: Array.isArray(flightsData.features) ? flightsData.features : []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching flights data:', error);
+      // Fallback to default data
+      setData({
+        id: '1',
+        title: 'FlightsNepal.com',
+        description: 'Nepal\'s Leading Flight Booking Platform - Your gateway to domestic and international destinations with the most advanced ticketing system and competitive prices.',
+        features: [
+          {
+            title: 'Domestic & International Flights',
+            description: 'Complete flight booking services for all destinations across Nepal and worldwide',
+            icon: 'Plane'
+          },
+          {
+            title: 'Real-time Booking System',
+            description: 'Advanced ticketing system with instant confirmation and e-tickets',
+            icon: 'Clock'
+          },
+          {
+            title: 'Secure Payment',
+            description: 'Safe and secure payment gateway with multiple payment options',
+            icon: 'Shield'
+          },
+          {
+            title: 'All Airlines',
+            description: 'Partner with all major domestic and international airlines',
+            icon: 'MapPin'
+          }
+        ],
+        hero_image_url: '/lovable-uploads/a3ba01b3-295e-4a69-9e00-85ffbc90571c.png'
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Plane':
+        return Plane;
+      case 'Clock':
+        return Clock;
+      case 'Shield':
+        return Shield;
+      case 'MapPin':
+        return MapPin;
+      default:
+        return Plane;
+    }
+  };
 
   const handleVisitWebsite = () => {
     window.open('https://flightsnepal.com', '_blank');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24 flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24 text-center py-20">
+          <p className="text-muted-foreground">FlightsNepal data not available.</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,14 +134,13 @@ const FlightsNepal = () => {
         <section className="py-20 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
           <div className="container mx-auto px-4 text-center">
             <img 
-              src="/lovable-uploads/a3ba01b3-295e-4a69-9e00-85ffbc90571c.png" 
+              src={data.hero_image_url} 
               alt="FlightsNepal Logo" 
               className="h-20 mx-auto mb-6"
             />
-            <h1 className="text-5xl font-bold mb-6">FlightsNepal.com</h1>
+            <h1 className="text-5xl font-bold mb-6">{data.title}</h1>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
-              Nepal's Leading Flight Booking Platform - Your gateway to domestic and international destinations 
-              with the most advanced ticketing system and competitive prices.
+              {data.description}
             </p>
             <Button 
               size="lg" 
@@ -69,17 +159,20 @@ const FlightsNepal = () => {
             <h2 className="text-4xl font-bold text-center mb-16">Our Flight Services</h2>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {features.map((feature, index) => (
-                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <feature.icon className="h-12 w-12 mx-auto text-primary mb-4" />
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {data.features.map((feature, index) => {
+                const IconComponent = getIcon(feature.icon);
+                return (
+                  <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <IconComponent className="h-12 w-12 mx-auto text-primary mb-4" />
+                      <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             <div className="text-center">

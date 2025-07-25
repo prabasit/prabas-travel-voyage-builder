@@ -299,6 +299,39 @@ export type Database = {
         }
         Relationships: []
       }
+      flights_nepal: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          hero_image_url: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           created_at: string | null
@@ -382,6 +415,27 @@ export type Database = {
           },
         ]
       }
+      newsletter_subscriptions: {
+        Row: {
+          email: string
+          id: string
+          is_active: boolean
+          subscribed_at: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          is_active?: boolean
+          subscribed_at?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          is_active?: boolean
+          subscribed_at?: string
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           content: string | null
@@ -412,6 +466,39 @@ export type Database = {
           slug?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      prabas_holidays: {
+        Row: {
+          created_at: string
+          description: string | null
+          hero_image_url: string | null
+          id: string
+          is_active: boolean
+          services: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          services?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          services?: Json | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

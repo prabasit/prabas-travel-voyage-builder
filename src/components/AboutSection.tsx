@@ -33,44 +33,48 @@ const AboutSection = () => {
         .limit(1)
         .single();
 
-      if (error) throw error;
-      
-      // Ensure arrays are properly formatted
-      const processedData = {
-        ...data,
-        values: Array.isArray(data.values) ? data.values : [],
-        stats: Array.isArray(data.stats) ? data.stats : []
-      };
-      
-      setAboutData(processedData);
+      if (error) {
+        console.error('Error fetching about data:', error);
+        // Use fallback data
+        setAboutData(getFallbackData());
+      } else {
+        // Ensure arrays are properly formatted
+        const processedData = {
+          ...data,
+          values: Array.isArray(data.values) ? data.values : (data.values ? JSON.parse(data.values) : []),
+          stats: Array.isArray(data.stats) ? data.stats : (data.stats ? JSON.parse(data.stats) : [])
+        };
+        setAboutData(processedData);
+      }
     } catch (error) {
       console.error('Error fetching about data:', error);
-      // Fallback data if CMS is empty
-      setAboutData({
-        id: '1',
-        title: 'About Prabas Travels',
-        description: 'We are Nepal\'s leading travel company, dedicated to providing exceptional travel experiences.',
-        story: 'Founded with a passion for showcasing Nepal\'s beauty to the world, we have been serving travelers for over a decade.',
-        mission: 'To make Nepal accessible to everyone while promoting sustainable tourism.',
-        vision: 'To be the most trusted travel partner for exploring Nepal and beyond.',
-        values: [
-          { title: 'Excellence', description: 'We strive for excellence in every service we provide.' },
-          { title: 'Sustainability', description: 'We promote responsible and sustainable tourism practices.' },
-          { title: 'Trust', description: 'We build lasting relationships based on trust and reliability.' },
-          { title: 'Innovation', description: 'We continuously innovate to enhance travel experiences.' }
-        ],
-        stats: [
-          { number: '10K+', label: 'Happy Customers' },
-          { number: '500+', label: 'Tours Completed' },
-          { number: '50+', label: 'Destinations' },
-          { number: '15+', label: 'Years Experience' }
-        ],
-        image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'
-      });
+      setAboutData(getFallbackData());
     } finally {
       setLoading(false);
     }
   };
+
+  const getFallbackData = (): AboutData => ({
+    id: '1',
+    title: 'About Prabas Travels',
+    description: 'We are Nepal\'s leading travel company, dedicated to providing exceptional travel experiences.',
+    story: 'Founded with a passion for showcasing Nepal\'s beauty to the world, we have been serving travelers for over a decade.',
+    mission: 'To make Nepal accessible to everyone while promoting sustainable tourism.',
+    vision: 'To be the most trusted travel partner for exploring Nepal and beyond.',
+    values: [
+      { title: 'Excellence', description: 'We strive for excellence in every service we provide.' },
+      { title: 'Sustainability', description: 'We promote responsible and sustainable tourism practices.' },
+      { title: 'Trust', description: 'We build lasting relationships based on trust and reliability.' },
+      { title: 'Innovation', description: 'We continuously innovate to enhance travel experiences.' }
+    ],
+    stats: [
+      { number: '10K+', label: 'Happy Customers' },
+      { number: '500+', label: 'Tours Completed' },
+      { number: '50+', label: 'Destinations' },
+      { number: '15+', label: 'Years Experience' }
+    ],
+    image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'
+  });
 
   if (loading) {
     return (
@@ -86,7 +90,6 @@ const AboutSection = () => {
 
   if (!aboutData) return null;
 
-  // Ensure we have arrays before mapping
   const statsArray = Array.isArray(aboutData.stats) ? aboutData.stats : [];
   const valuesArray = Array.isArray(aboutData.values) ? aboutData.values : [];
 

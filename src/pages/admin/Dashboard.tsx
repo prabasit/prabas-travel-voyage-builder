@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, MessageSquare, Award, Mail, Settings } from 'lucide-react';
+import { Users, FileText, MessageSquare, Award, Mail, Settings, Shield, Plane, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
@@ -12,7 +12,9 @@ const Dashboard = () => {
     testimonials: 0,
     awards: 0,
     inquiries: 0,
-    pages: 0
+    pages: 0,
+    admins: 0,
+    newsletters: 0
   });
 
   useEffect(() => {
@@ -21,13 +23,15 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [teamRes, blogRes, testimonialsRes, awardsRes, inquiriesRes, pagesRes] = await Promise.all([
+      const [teamRes, blogRes, testimonialsRes, awardsRes, inquiriesRes, pagesRes, adminsRes, newslettersRes] = await Promise.all([
         supabase.from('team_members').select('*', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('testimonials').select('*', { count: 'exact', head: true }),
         supabase.from('awards').select('*', { count: 'exact', head: true }),
         supabase.from('inquiries').select('*', { count: 'exact', head: true }),
-        supabase.from('pages').select('*', { count: 'exact', head: true })
+        supabase.from('pages').select('*', { count: 'exact', head: true }),
+        supabase.from('admin_users').select('*', { count: 'exact', head: true }),
+        supabase.from('newsletter_subscriptions').select('*', { count: 'exact', head: true })
       ]);
 
       setStats({
@@ -36,7 +40,9 @@ const Dashboard = () => {
         testimonials: testimonialsRes.count || 0,
         awards: awardsRes.count || 0,
         inquiries: inquiriesRes.count || 0,
-        pages: pagesRes.count || 0
+        pages: pagesRes.count || 0,
+        admins: adminsRes.count || 0,
+        newsletters: newslettersRes.count || 0
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -49,7 +55,9 @@ const Dashboard = () => {
     { title: 'Testimonials', value: stats.testimonials, icon: MessageSquare, color: 'text-purple-600' },
     { title: 'Awards', value: stats.awards, icon: Award, color: 'text-yellow-600' },
     { title: 'Inquiries', value: stats.inquiries, icon: Mail, color: 'text-red-600' },
-    { title: 'Pages', value: stats.pages, icon: Settings, color: 'text-indigo-600' }
+    { title: 'Pages', value: stats.pages, icon: Settings, color: 'text-indigo-600' },
+    { title: 'Admin Users', value: stats.admins, icon: Shield, color: 'text-gray-600' },
+    { title: 'Newsletter Subs', value: stats.newsletters, icon: Mail, color: 'text-cyan-600' }
   ];
 
   return (
@@ -60,7 +68,7 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Welcome to Prabas Travels Admin Panel</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -97,6 +105,22 @@ const Dashboard = () => {
                   <Award className="h-6 w-6 mx-auto mb-1 text-yellow-600" />
                   <span className="text-sm">Add Award</span>
                 </a>
+                <a href="/admin/admin-management" className="p-3 bg-gray-50 rounded-lg text-center hover:bg-gray-100 transition-colors">
+                  <Shield className="h-6 w-6 mx-auto mb-1 text-gray-600" />
+                  <span className="text-sm">Manage Admins</span>
+                </a>
+                <a href="/admin/flights-nepal" className="p-3 bg-sky-50 rounded-lg text-center hover:bg-sky-100 transition-colors">
+                  <Plane className="h-6 w-6 mx-auto mb-1 text-sky-600" />
+                  <span className="text-sm">FlightsNepal</span>
+                </a>
+                <a href="/admin/prabas-holidays" className="p-3 bg-emerald-50 rounded-lg text-center hover:bg-emerald-100 transition-colors">
+                  <Globe className="h-6 w-6 mx-auto mb-1 text-emerald-600" />
+                  <span className="text-sm">Prabas Holidays</span>
+                </a>
+                <a href="/admin/inquiries" className="p-3 bg-red-50 rounded-lg text-center hover:bg-red-100 transition-colors">
+                  <Mail className="h-6 w-6 mx-auto mb-1 text-red-600" />
+                  <span className="text-sm">View Inquiries</span>
+                </a>
               </div>
             </CardContent>
           </Card>
@@ -113,6 +137,10 @@ const Dashboard = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Admin Panel</span>
+                  <span className="text-green-600 font-medium">Active</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Newsletter System</span>
                   <span className="text-green-600 font-medium">Active</span>
                 </div>
                 <div className="flex justify-between items-center">
