@@ -27,6 +27,11 @@ import AwardsManagement from "./pages/admin/AwardsManagement";
 import InquiriesManagement from "./pages/admin/InquiriesManagement";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/admin/Settings";
+import Login from "./pages/admin/Login";
+import AdminManagement from "./pages/admin/AdminManagement";
+import FlightsNepalManagement from "./pages/admin/FlightsNepalManagement";
+import PrabasHolidaysManagement from "./pages/admin/PrabasHolidaysManagement";
+import NewsletterManagement from "./pages/admin/NewsletterManagement";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +53,8 @@ const App = () => (
           <Route path="/careers" element={<Careers />} />
           <Route path="/flights-nepal" element={<FlightsNepal />} />
           <Route path="/prabas-holidays" element={<PrabasHolidays />} />
-          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin" element={<Login />} />
+          <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/pages" element={<Pages />} />
           <Route path="/admin/about" element={<AdminAbout />} />
@@ -60,6 +66,10 @@ const App = () => (
           <Route path="/admin/testimonials" element={<TestimonialsManagement />} />
           <Route path="/admin/awards" element={<AwardsManagement />} />
           <Route path="/admin/inquiries" element={<InquiriesManagement />} />
+          <Route path="/admin/admin-management" element={<AdminManagement />} />
+          <Route path="/admin/flights-nepal" element={<FlightsNepalManagement />} />
+          <Route path="/admin/prabas-holidays" element={<PrabasHolidaysManagement />} />
+          <Route path="/admin/newsletter" element={<NewsletterManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

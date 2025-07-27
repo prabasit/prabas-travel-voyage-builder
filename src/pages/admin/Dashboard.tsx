@@ -121,6 +121,10 @@ const Dashboard = () => {
                   <Mail className="h-6 w-6 mx-auto mb-1 text-red-600" />
                   <span className="text-sm">View Inquiries</span>
                 </a>
+                <a href="/admin/newsletter" className="p-3 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
+                  <Mail className="h-6 w-6 mx-auto mb-1 text-orange-600" />
+                  <span className="text-sm">Newsletter</span>
+                </a>
               </div>
             </CardContent>
           </Card>
