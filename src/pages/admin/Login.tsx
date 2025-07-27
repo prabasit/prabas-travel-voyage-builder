@@ -1,78 +1,48 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { Lock, Mail } from 'lucide-react';
 
 const Login = () => {
-  const [email, setEmail] = useState('admin@flightsnepal.com');
-  const [password, setPassword] = useState('admin123');
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: 'admin@flightsnepal.com',
+    password: 'admin123'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, isAuthenticated } = useSecureAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    
+    setIsLoading(true);
+
     try {
-      console.log('Attempting login with:', email, password);
-      
-      // Simple direct query to admin_users table
-      const { data: adminUser, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', email)
-        .eq('is_active', true)
-        .single();
-
-      console.log('Admin user query result:', adminUser, error);
-
-      if (error || !adminUser) {
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // For now, use simple password check
-      if (password === 'admin123') {
-        // Store admin session
-        localStorage.setItem('admin_session', JSON.stringify({
-          id: adminUser.id,
-          email: adminUser.email,
-          role: adminUser.role,
-          is_active: adminUser.is_active
-        }));
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Admin Dashboard",
-        });
-        
+      const success = await login(formData.email, formData.password);
+      if (success) {
         navigate('/admin/dashboard');
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password",
-          variant: "destructive",
-        });
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        title: "Login Failed",
-        description: "An error occurred during login",
-        variant: "destructive",
-      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -85,38 +55,55 @@ const Login = () => {
             alt="Prabas Travels Logo" 
             className="h-16 mx-auto mb-4"
           />
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <p className="text-muted-foreground">Access the admin dashboard</p>
           <p className="text-sm text-muted-foreground mt-2">
             Email: admin@flightsnepal.com<br/>
             Password: admin123
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="pl-10"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="pl-10"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </CardContent>
