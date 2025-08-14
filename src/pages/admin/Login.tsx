@@ -57,10 +57,7 @@ const Login = () => {
           />
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <p className="text-muted-foreground">Access the admin dashboard</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Email: admin@flightsnepal.com<br/>
-            Password: admin123
-          </p>
+         
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
