@@ -32,45 +32,61 @@ const Newsletter = () => {
     setIsSubmitting(true);
 
     try {
-      // Check if email already exists
+      // Check if email already exists and is active
       const { data: existingSubscription, error: checkError } = await supabase
         .from('newsletter_subscriptions')
-        .select('email')
+        .select('email, is_active')
         .eq('email', sanitizedEmail)
-        .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Check subscription error:', checkError);
         throw checkError;
       }
 
       if (existingSubscription) {
+        if (existingSubscription.is_active) {
+          toast({
+            title: "Already Subscribed",
+            description: "This email is already subscribed to our newsletter",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        } else {
+          // Reactivate existing subscription
+          const { error: updateError } = await supabase
+            .from('newsletter_subscriptions')
+            .update({
+              is_active: true,
+              subscribed_at: new Date().toISOString()
+            })
+            .eq('email', sanitizedEmail);
+
+          if (updateError) throw updateError;
+
+          toast({
+            title: "Subscription Reactivated!",
+            description: "Your newsletter subscription has been reactivated",
+          });
+        }
+      } else {
+        // Create new subscription
+        const { error: insertError } = await supabase
+          .from('newsletter_subscriptions')
+          .insert([{
+            email: sanitizedEmail,
+            is_active: true,
+            subscribed_at: new Date().toISOString()
+          }]);
+
+        if (insertError) throw insertError;
+
         toast({
-          title: "Already Subscribed",
-          description: "This email is already subscribed to our newsletter",
-          variant: "destructive",
+          title: "Subscribed Successfully!",
+          description: "Thank you for subscribing to our newsletter",
         });
-        setIsSubmitting(false);
-        return;
       }
-
-      // Subscribe to newsletter
-      const { error } = await supabase
-        .from('newsletter_subscriptions')
-        .insert([{
-          email: sanitizedEmail,
-          is_active: true,
-          subscribed_at: new Date().toISOString()
-        }]);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Subscribed Successfully!",
-        description: "Thank you for subscribing to our newsletter",
-      });
 
       setEmail('');
     } catch (error) {

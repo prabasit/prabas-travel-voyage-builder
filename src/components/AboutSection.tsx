@@ -1,19 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Users, Award, Globe, Heart, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, Award, Globe, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AboutData {
-  id: string;
   title: string;
   description: string;
   story: string;
   mission: string;
   vision: string;
-  values: any[];
-  stats: any[];
+  values: Array<{
+    title: string;
+    description: string;
+    icon?: string;
+  }>;
+  stats: Array<{
+    label: string;
+    value: string;
+    icon?: string;
+  }>;
   image_url: string;
 }
 
@@ -31,53 +38,41 @@ const AboutSection = () => {
         .from('about_us')
         .select('*')
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.log('No about_us data found, using fallback');
-        setAboutData(getFallbackData());
-      } else {
-        // Ensure arrays are properly formatted
-        const processedData = {
-          ...data,
-          values: Array.isArray(data.values) ? data.values : [],
-          stats: Array.isArray(data.stats) ? data.stats : []
-        };
-        setAboutData(processedData);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching about data:', error);
+        return;
+      }
+
+      if (data) {
+        setAboutData(data);
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
-      setAboutData(getFallbackData());
     } finally {
       setLoading(false);
     }
   };
 
-  const getFallbackData = (): AboutData => ({
-    id: '1',
-    title: 'About Prabas Travels',
-    description: 'We are Nepal\'s leading travel company, dedicated to providing exceptional travel experiences.',
-    story: 'Founded with a passion for showcasing Nepal\'s beauty to the world, we have been serving travelers for over a decade.',
-    mission: 'To make Nepal accessible to everyone while promoting sustainable tourism.',
-    vision: 'To be the most trusted travel partner for exploring Nepal and beyond.',
-    values: [
-      { title: 'Excellence', description: 'We strive for excellence in every service we provide.' },
-      { title: 'Sustainability', description: 'We promote responsible and sustainable tourism practices.' },
-      { title: 'Trust', description: 'We build lasting relationships based on trust and reliability.' },
-      { title: 'Innovation', description: 'We continuously innovate to enhance travel experiences.' }
-    ],
-    stats: [
-      { number: '10K+', label: 'Happy Customers' },
-      { number: '500+', label: 'Tours Completed' },
-      { number: '50+', label: 'Destinations' },
-      { number: '15+', label: 'Years Experience' }
-    ],
-    image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'
-  });
+  const getIconComponent = (iconName?: string) => {
+    switch (iconName) {
+      case 'users':
+        return <Users className="h-6 w-6" />;
+      case 'award':
+        return <Award className="h-6 w-6" />;
+      case 'globe':
+        return <Globe className="h-6 w-6" />;
+      case 'heart':
+        return <Heart className="h-6 w-6" />;
+      default:
+        return <Heart className="h-6 w-6" />;
+    }
+  };
 
   if (loading) {
     return (
-      <section id="about" className="py-12 md:py-20 bg-background">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -87,87 +82,119 @@ const AboutSection = () => {
     );
   }
 
-  if (!aboutData) return null;
-
-  const getValueIcon = (index: number) => {
-    const icons = [Award, Globe, Heart, Users];
-    const IconComponent = icons[index % icons.length];
-    return <IconComponent className="h-10 w-10 md:h-12 md:w-12 mx-auto text-primary" />;
-  };
+  if (!aboutData) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">About Prabas Travels</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Your trusted partner for unforgettable travel experiences across Nepal and beyond.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section id="about" className="py-12 md:py-20 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-foreground">{aboutData.title}</h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            {aboutData.description}
-          </p>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{aboutData.title}</h2>
+          {aboutData.description && (
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              {aboutData.description}
+            </p>
+          )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center mb-12 md:mb-16">
-          <div className="order-2 lg:order-1">
-            <img
-              src={aboutData.image_url}
-              alt="About Us"
-              className="rounded-lg shadow-xl w-full h-64 md:h-80 lg:h-96 object-cover"
-            />
-          </div>
-          <div className="space-y-6 md:space-y-8 order-1 lg:order-2">
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-foreground">Our Story</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {aboutData.story}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-foreground">Our Mission</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {aboutData.mission}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-foreground">Our Vision</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {aboutData.vision}
-              </p>
-            </div>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Learn More About Us
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        {aboutData.stats.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16">
-            {aboutData.stats.map((stat, index) => (
-              <div key={index} className="text-center p-4 md:p-6 bg-muted/50 rounded-lg">
-                <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">{stat.number}</div>
-                <div className="text-muted-foreground text-sm md:text-base">{stat.label}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+          <div className="space-y-8">
+            {aboutData.story && (
+              <div>
+                <h3 className="text-2xl font-semibold mb-4">Our Story</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {aboutData.story}
+                </p>
               </div>
-            ))}
+            )}
+
+            {aboutData.mission && (
+              <div>
+                <h3 className="text-2xl font-semibold mb-4">Our Mission</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {aboutData.mission}
+                </p>
+              </div>
+            )}
+
+            {aboutData.vision && (
+              <div>
+                <h3 className="text-2xl font-semibold mb-4">Our Vision</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {aboutData.vision}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-center">
+            {aboutData.image_url ? (
+              <img
+                src={aboutData.image_url}
+                alt="About Prabas Travels"
+                className="rounded-lg shadow-lg max-w-full h-auto"
+              />
+            ) : (
+              <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                <p className="text-muted-foreground">Image not available</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Values Section */}
+        {aboutData.values && aboutData.values.length > 0 && (
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {aboutData.values.map((value, index) => (
+                <Card key={index} className="text-center">
+                  <CardContent className="p-6">
+                    <div className="flex justify-center mb-4 text-primary">
+                      {getIconComponent(value.icon)}
+                    </div>
+                    <h4 className="font-semibold mb-2">{value.title}</h4>
+                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Values Section */}
-        <div>
-          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12 text-foreground">Our Values</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {aboutData.values.map((value, index) => (
-              <Card key={index} className="text-center bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <CardContent className="p-6 md:p-8">
-                  <div className="mb-4 md:mb-6">
-                    {getValueIcon(index)}
+        {/* Stats Section */}
+        {aboutData.stats && aboutData.stats.length > 0 && (
+          <div className="bg-muted/30 rounded-lg p-8">
+            <h3 className="text-2xl font-semibold text-center mb-8">Our Achievements</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {aboutData.stats.map((stat, index) => (
+                <div key={index} className="text-center">
+                  <div className="flex justify-center mb-2 text-primary">
+                    {getIconComponent(stat.icon)}
                   </div>
-                  <h4 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 text-card-foreground">{value.title}</h4>
-                  <p className="text-muted-foreground text-sm md:text-base">{value.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="text-2xl font-bold text-primary mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

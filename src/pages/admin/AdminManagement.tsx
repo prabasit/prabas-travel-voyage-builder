@@ -70,6 +70,27 @@ const AdminManagement = () => {
     setIsSubmitting(true);
 
     try {
+      // Input validation
+      if (!formData.email || (!formData.password && !editingId)) {
+        toast({
+          title: "Validation Error",
+          description: "Email and password are required",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.email.includes('@')) {
+        toast({
+          title: "Validation Error",
+          description: "Please enter a valid email address",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       if (editingId) {
         // Update existing admin
         const updateData: any = {
@@ -78,8 +99,8 @@ const AdminManagement = () => {
           updated_at: new Date().toISOString()
         };
 
-        if (formData.password) {
-          updateData.password_hash = formData.password; // In production, this should be hashed
+        if (formData.password && formData.password.trim() !== '') {
+          updateData.password_hash = formData.password;
         }
 
         const { error } = await supabase
@@ -94,16 +115,38 @@ const AdminManagement = () => {
           description: "Admin user updated successfully.",
         });
       } else {
+        // Check if email already exists
+        const { data: existingAdmin, error: checkError } = await supabase
+          .from('admin_users')
+          .select('email')
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+
+        if (existingAdmin) {
+          toast({
+            title: "Error",
+            description: "An admin with this email already exists.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
         // Create new admin
-        const { error } = await supabase
+        const { error: insertError } = await supabase
           .from('admin_users')
           .insert([{
             email: formData.email,
-            password_hash: formData.password, // In production, this should be hashed
-            role: formData.role
+            password_hash: formData.password,
+            role: formData.role,
+            is_active: true
           }]);
 
-        if (error) throw error;
+        if (insertError) throw insertError;
 
         toast({
           title: "Success",
@@ -119,7 +162,7 @@ const AdminManagement = () => {
       console.error('Error saving admin:', error);
       toast({
         title: "Error",
-        description: "Failed to save admin user.",
+        description: "Failed to save admin user. Please check the details and try again.",
         variant: "destructive",
       });
     } finally {
@@ -204,13 +247,6 @@ const AdminManagement = () => {
             <h1 className="text-3xl font-bold">Admin Management</h1>
             <p className="text-muted-foreground">Manage admin users and their permissions</p>
           </div>
-          <Button onClick={() => {
-            setFormData({ email: '', password: '', role: 'admin' });
-            setEditingId(null);
-          }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Admin
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -237,7 +273,9 @@ const AdminManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password">Password {editingId && '(leave blank to keep current)'}</Label>
+                  <Label htmlFor="password">
+                    Password {editingId && '(leave blank to keep current)'}
+                  </Label>
                   <Input
                     id="password"
                     name="password"
@@ -246,6 +284,7 @@ const AdminManagement = () => {
                     onChange={handleInputChange}
                     placeholder="Enter password"
                     required={!editingId}
+                    minLength={6}
                   />
                 </div>
                 <div>

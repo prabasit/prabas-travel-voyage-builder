@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield, ArrowLeft, Home } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,8 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { isAuthenticated, adminUser, loading, logout } = useSecureAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -26,6 +28,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     return <Navigate to="/admin/login" replace />;
   }
 
+  const isOnDashboard = location.pathname === '/admin/dashboard';
+  const canGoBack = !isOnDashboard && location.pathname !== '/admin/login';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
@@ -37,6 +42,28 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               alt="Prabas Travels Logo" 
               className="h-8"
             />
+            <div className="flex items-center space-x-2">
+              {canGoBack && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate(-1)}
+                  className="flex items-center space-x-1"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back</span>
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/admin/dashboard')}
+                className="flex items-center space-x-1"
+              >
+                <Home className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Button>
+            </div>
             <h1 className="text-xl font-bold">Admin Dashboard</h1>
           </div>
           
