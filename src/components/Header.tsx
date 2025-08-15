@@ -119,7 +119,8 @@ const Header = () => {
               </NavigationMenuList>
             </NavigationMenu>
 
-            <Button className="bg-accent hover:bg-accent/90">Get Quote</Button>
+            <Button className="bg-[#F15A24] hover:bg-[#d94f20]">Get Quote</Button>
+
           </div>
 
           {/* Mobile Menu Button */}
