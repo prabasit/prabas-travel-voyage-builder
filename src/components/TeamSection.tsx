@@ -191,24 +191,7 @@ const TeamSection = () => {
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-sm">{member.bio}</p>
                 
-                <div className="space-y-2">
-                  {member.email && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a href={`mailto:${member.email}`} className="hover:text-primary transition-colors">
-                        {member.email}
-                      </a>
-                    </div>
-                  )}
-                  {member.phone && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <a href={`tel:${member.phone}`} className="hover:text-primary transition-colors">
-                        {member.phone}
-                      </a>
-                    </div>
-                  )}
-                </div>
+                {/* Contact information removed for security - available only to admins */}
               </CardContent>
             </Card>
           ))}
