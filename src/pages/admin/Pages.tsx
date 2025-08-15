@@ -45,7 +45,7 @@ const Pages = () => {
         .from('pages')
         .insert([pageData])
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -71,7 +71,7 @@ const Pages = () => {
         .update(pageData)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;

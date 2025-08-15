@@ -50,7 +50,7 @@ const TeamManagement = () => {
         .from('team_members')
         .insert([{ ...memberData, display_order: maxOrder + 1 }])
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -77,7 +77,7 @@ const TeamManagement = () => {
         .update(memberData)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;

@@ -54,7 +54,7 @@ const BannerManagement = () => {
         .from('banner_slides')
         .insert([{ ...bannerData, display_order: maxOrder + 1 }])
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -81,7 +81,7 @@ const BannerManagement = () => {
         .update(bannerData)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
