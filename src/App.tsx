@@ -32,6 +32,8 @@ import AdminManagement from "./pages/admin/AdminManagement";
 import FlightsNepalManagement from "./pages/admin/FlightsNepalManagement";
 import PrabasHolidaysManagement from "./pages/admin/PrabasHolidaysManagement";
 import NewsletterManagement from "./pages/admin/NewsletterManagement";
+import BannerManagement from "./pages/admin/BannerManagement";
+import DynamicPage from "./pages/DynamicPage";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +73,8 @@ const App = () => (
           <Route path="/admin/prabas-holidays" element={<PrabasHolidaysManagement />} />
           <Route path="/admin/newsletter" element={<NewsletterManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
+          <Route path="/admin/banners" element={<BannerManagement />} />
+          <Route path="/:slug" element={<DynamicPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, MessageSquare, Award, Mail, Settings, Shield, Plane, Globe } from 'lucide-react';
+import { Users, FileText, MessageSquare, Award, Mail, Settings, Shield, Plane, Globe, Image, Layout } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
@@ -124,6 +124,14 @@ const Dashboard = () => {
                 <a href="/admin/newsletter" className="p-3 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
                   <Mail className="h-6 w-6 mx-auto mb-1 text-orange-600" />
                   <span className="text-sm">Newsletter</span>
+                </a>
+                <a href="/admin/banners" className="p-3 bg-pink-50 rounded-lg text-center hover:bg-pink-100 transition-colors">
+                  <Image className="h-6 w-6 mx-auto mb-1 text-pink-600" />
+                  <span className="text-sm">Banners</span>
+                </a>
+                <a href="/admin/pages" className="p-3 bg-indigo-50 rounded-lg text-center hover:bg-indigo-100 transition-colors">
+                  <Layout className="h-6 w-6 mx-auto mb-1 text-indigo-600" />
+                  <span className="text-sm">Pages CMS</span>
                 </a>
               </div>
             </CardContent>
