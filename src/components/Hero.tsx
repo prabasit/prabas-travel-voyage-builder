@@ -121,14 +121,14 @@ const Hero = () => {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <section className="relative h-screen overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
-        style={{ 
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${currentSlideData.image_url})` 
-        }}
-      />
+{/* Background Image */}
+<div 
+  className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+  style={{ 
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)), url(${currentSlideData.image_url})` 
+  }}
+/>
+
       
       {/* Content */}
       <div className="relative z-10 h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8">
