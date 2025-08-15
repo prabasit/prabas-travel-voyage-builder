@@ -208,7 +208,7 @@ const AwardsManagement = () => {
                     id="year"
                     type="number"
                     value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value))}
+                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                     required
                   />
                 </div>
