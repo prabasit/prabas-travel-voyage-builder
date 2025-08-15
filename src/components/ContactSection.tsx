@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { validateEmail, validatePhone, sanitizeInput } from '@/utils/security';
-import { Send, Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { validateEmail, sanitizeInput } from '@/utils/security';
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -22,69 +22,10 @@ const ContactSection = () => {
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: sanitizeInput(value)
+      [e.target.name]: e.target.value
     }));
-  };
-
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Name is required",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (!validateEmail(formData.email)) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.phone && !validatePhone(formData.phone)) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid phone number",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (!formData.subject.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Subject is required",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (!formData.message.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Message is required",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.message.length > 1000) {
-      toast({
-        title: "Validation Error",
-        description: "Message must be less than 1000 characters",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,28 +33,46 @@ const ContactSection = () => {
     
     if (isSubmitting) return;
     
-    if (!validateForm()) return;
+    // Validate required fields
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
+      const sanitizedData = {
+        name: sanitizeInput(formData.name),
+        email: sanitizeInput(formData.email),
+        phone: sanitizeInput(formData.phone),
+        subject: sanitizeInput(formData.subject),
+        message: sanitizeInput(formData.message),
+        status: 'pending'
+      };
+
       const { error } = await supabase
         .from('inquiries')
-        .insert([{
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim() || null,
-          subject: formData.subject.trim(),
-          message: formData.message.trim(),
-          status: 'pending'
-        }]);
+        .insert([sanitizedData]);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Message Sent Successfully!",
+        title: "Message Sent!",
         description: "Thank you for your inquiry. We'll get back to you soon.",
       });
 
@@ -125,7 +84,6 @@ const ContactSection = () => {
         subject: '',
         message: ''
       });
-
     } catch (error) {
       console.error('Contact form error:', error);
       toast({
@@ -141,69 +99,56 @@ const ContactSection = () => {
   return (
     <section id="contact" className="py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-foreground">
-            Get in Touch
-          </h2>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Ready to plan your next adventure? Contact us today and let's make your travel dreams come true.
+            Ready to start your Nepal adventure? Contact us for personalized travel planning and expert guidance.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 md:gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Send className="h-5 w-5 mr-2" />
-                Send us a Message
-              </CardTitle>
+              <CardTitle>Send us a Message</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="name">Name *</Label>
+                    <Label htmlFor="name">Full Name *</Label>
                     <Input
                       id="name"
                       name="name"
-                      type="text"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Your full name"
                       required
                       disabled={isSubmitting}
-                      maxLength={100}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">Email Address *</Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="your@email.com"
                       required
                       disabled={isSubmitting}
-                      maxLength={254}
                     />
                   </div>
                 </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
                       name="phone"
-                      type="tel"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="+977-1-4567890"
                       disabled={isSubmitting}
-                      maxLength={20}
                     />
                   </div>
                   <div>
@@ -211,17 +156,14 @@ const ContactSection = () => {
                     <Input
                       id="subject"
                       name="subject"
-                      type="text"
                       value={formData.subject}
                       onChange={handleInputChange}
-                      placeholder="How can we help you?"
                       required
                       disabled={isSubmitting}
-                      maxLength={200}
                     />
                   </div>
                 </div>
-
+                
                 <div>
                   <Label htmlFor="message">Message *</Label>
                   <Textarea
@@ -229,91 +171,76 @@ const ContactSection = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Tell us about your travel plans..."
-                    rows={6}
+                    className="min-h-[120px]"
                     required
                     disabled={isSubmitting}
-                    maxLength={1000}
                   />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {formData.message.length}/1000 characters
-                  </p>
                 </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isSubmitting}
-                  size="lg"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                      Sending Message...
-                    </div>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
+                
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           {/* Contact Information */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
+                  <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Phone</h3>
-                    <p className="text-muted-foreground">+977-1-4567890</p>
-                    <p className="text-sm text-muted-foreground">Emergency: +977-9801234567</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Mail className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-muted-foreground">info@prabastravels.com</p>
-                    <p className="text-sm text-muted-foreground">support@prabastravels.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Address</h3>
+                    <h3 className="font-semibold mb-2">Our Office</h3>
                     <p className="text-muted-foreground">
-                      Thamel, Kathmandu<br />
-                      Nepal
+                      Thamel, Kathmandu, Nepal<br />
+                      GPO Box 12345
                     </p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
+            <Card>
+              <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Clock className="h-5 w-5 text-primary" />
-                  </div>
+                  <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Business Hours</h3>
+                    <h3 className="font-semibold mb-2">Phone</h3>
                     <p className="text-muted-foreground">
-                      Mon - Fri: 9:00 AM - 6:00 PM<br />
-                      Sat: 9:00 AM - 4:00 PM<br />
-                      Sun: Closed
+                      +977-1-4123456<br />
+                      +977-9841234567
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Email</h3>
+                    <p className="text-muted-foreground">
+                      info@flightsnepal.com<br />
+                      booking@flightsnepal.com
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Business Hours</h3>
+                    <p className="text-muted-foreground">
+                      Monday - Friday: 9:00 AM - 6:00 PM<br />
+                      Saturday: 9:00 AM - 4:00 PM<br />
+                      Sunday: Closed
                     </p>
                   </div>
                 </div>

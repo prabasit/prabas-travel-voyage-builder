@@ -1,34 +1,21 @@
-
-import React, { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import React, { useState } from 'react';
+import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit, Trash2, Plus, Save, Award } from 'lucide-react';
-
-interface AwardType {
-  id: string;
-  title: string;
-  organization: string;
-  year: number;
-  description: string;
-  image_url: string;
-  category: string;
-  is_active: boolean;
-}
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileUpload } from '@/components/ui/file-upload';
 
 const AwardsManagement = () => {
-  const [awards, setAwards] = useState<AwardType[]>([]);
-  const [editingAward, setEditingAward] = useState<AwardType | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
+  const [selectedAward, setSelectedAward] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     organization: '',
@@ -38,112 +25,96 @@ const AwardsManagement = () => {
     category: '',
     is_active: true
   });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchAwards();
-  }, []);
-
-  const fetchAwards = async () => {
-    try {
+  const { data: awards, isLoading } = useQuery({
+    queryKey: ['awards'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('awards')
         .select('*')
         .order('year', { ascending: false });
-
+      
       if (error) throw error;
-      setAwards(data || []);
-    } catch (error) {
-      console.error('Error fetching awards:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch awards",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      return data || [];
     }
-  };
+  });
 
-  const handleSaveAward = async () => {
-    try {
-      if (editingAward) {
-        const { error } = await supabase
-          .from('awards')
-          .update(formData)
-          .eq('id', editingAward.id);
-
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "Award updated successfully",
-        });
-      } else {
-        const { error } = await supabase
-          .from('awards')
-          .insert([formData]);
-
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "Award created successfully",
-        });
-      }
-
-      fetchAwards();
+  const createAwardMutation = useMutation({
+    mutationFn: async (awardData: any) => {
+      const { data, error } = await supabase
+        .from('awards')
+        .insert([awardData])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['awards'] });
+      toast({ title: 'Award created successfully' });
       resetForm();
-    } catch (error) {
-      console.error('Error saving award:', error);
+    },
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to save award",
-        variant: "destructive",
+        title: 'Error creating award',
+        description: error.message,
+        variant: 'destructive'
       });
     }
-  };
+  });
 
-  const handleDeleteAward = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this award?')) return;
+  const updateAwardMutation = useMutation({
+    mutationFn: async ({ id, ...awardData }: any) => {
+      const { data, error } = await supabase
+        .from('awards')
+        .update(awardData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['awards'] });
+      toast({ title: 'Award updated successfully' });
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error updating award',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
 
-    try {
+  const deleteAwardMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('awards')
         .delete()
         .eq('id', id);
-
-      if (error) throw error;
       
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['awards'] });
+      toast({ title: 'Award deleted successfully' });
+    },
+    onError: (error: any) => {
       toast({
-        title: "Success",
-        description: "Award deleted successfully",
-      });
-      fetchAwards();
-    } catch (error) {
-      console.error('Error deleting award:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete award",
-        variant: "destructive",
+        title: 'Error deleting award',
+        description: error.message,
+        variant: 'destructive'
       });
     }
-  };
-
-  const startEditing = (award: AwardType) => {
-    setEditingAward(award);
-    setFormData({
-      title: award.title,
-      organization: award.organization,
-      year: award.year,
-      description: award.description || '',
-      image_url: award.image_url || '',
-      category: award.category || '',
-      is_active: award.is_active
-    });
-    setIsCreating(false);
-  };
+  });
 
   const resetForm = () => {
-    setEditingAward(null);
-    setIsCreating(false);
     setFormData({
       title: '',
       organization: '',
@@ -153,9 +124,35 @@ const AwardsManagement = () => {
       category: '',
       is_active: true
     });
+    setSelectedAward(null);
+    setIsDialogOpen(false);
   };
 
-  if (loading) {
+  const handleEdit = (award: any) => {
+    setSelectedAward(award);
+    setFormData({
+      title: award.title,
+      organization: award.organization,
+      year: award.year,
+      description: award.description || '',
+      image_url: award.image_url || '',
+      category: award.category || '',
+      is_active: award.is_active
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (selectedAward) {
+      updateAwardMutation.mutate({ ...formData, id: selectedAward.id });
+    } else {
+      createAwardMutation.mutate(formData);
+    }
+  };
+
+  if (isLoading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
@@ -168,31 +165,32 @@ const AwardsManagement = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Awards Management</h1>
-            <p className="text-muted-foreground">Manage company awards and recognitions</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Awards Management</h1>
+            <p className="text-muted-foreground">Manage company awards and achievements</p>
           </div>
-          <Button onClick={() => setIsCreating(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Award
-          </Button>
-        </div>
-
-        {(isCreating || editingAward) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{editingAward ? 'Edit Award' : 'Create New Award'}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Award
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedAward ? 'Edit Award' : 'Add New Award'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Award Title</Label>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Award title"
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
                   />
                 </div>
                 <div>
@@ -200,21 +198,36 @@ const AwardsManagement = () => {
                   <Input
                     id="organization"
                     value={formData.organization}
-                    onChange={(e) => setFormData(prev => ({ ...prev, organization: e.target.value }))}
-                    placeholder="Awarding organization"
+                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                    required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="year">Year</Label>
                   <Input
                     id="year"
                     type="number"
                     value={formData.year}
-                    onChange={(e) => setFormData(prev => ({ ...prev, year: parseInt(e.target.value) || new Date().getFullYear() }))}
-                    placeholder="Award year"
+                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <FileUpload
+                    onFileUpload={(url) => setFormData({ ...formData, image_url: url })}
+                    currentFile={formData.image_url}
+                    acceptedTypes="image/*"
+                    maxSize={10485760}
+                    label="Award Image (Max 10MB)"
                   />
                 </div>
                 <div>
@@ -222,112 +235,89 @@ const AwardsManagement = () => {
                   <Input
                     id="category"
                     value={formData.category}
-                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="Award category"
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="image_url">Award Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  placeholder="https://example.com/award-image.jpg"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Award description"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
-
-              <div className="flex gap-2">
-                <Button onClick={handleSaveAward}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Award
-                </Button>
-                <Button variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label htmlFor="is_active">Active</Label>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createAwardMutation.isPending || updateAwardMutation.isPending}>
+                    {selectedAward ? 'Update' : 'Create'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         <div className="grid gap-4">
-          {awards.map((award) => (
+          {awards?.map((award) => (
             <Card key={award.id}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-2">
-                      <Award className="h-6 w-6 text-yellow-600" />
-                      <h3 className="text-xl font-semibold">{award.title}</h3>
-                      <span className="text-muted-foreground">({award.year})</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        award.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {award.is_active ? 'Active' : 'Inactive'}
-                      </span>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex items-center space-x-4 min-w-0 flex-1">
+                    {award.image_url && (
+                      <img 
+                        src={award.image_url} 
+                        alt={award.title}
+                        className="w-16 h-16 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="truncate">{award.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {award.organization} - {award.year}
+                      </p>
                     </div>
-                    <p className="text-muted-foreground mb-2">
-                      <strong>Organization:</strong> {award.organization}
-                    </p>
-                    {award.description && (
-                      <p className="text-muted-foreground mb-2">{award.description}</p>
-                    )}
-                    {award.category && (
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        {award.category}
-                      </span>
-                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => startEditing(award)}
+                      onClick={() => handleEdit(award)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDeleteAward(award.id)}
+                      onClick={() => deleteAwardMutation.mutate(award.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      award.is_active 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {award.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    {award.category && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        Category: {award.category}
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {awards.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No awards found. Create your first award to get started.</p>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </AdminLayout>
   );

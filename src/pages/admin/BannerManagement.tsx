@@ -44,9 +44,10 @@ const BannerManagement = () => {
 
   const createBannerMutation = useMutation({
     mutationFn: async (bannerData: any) => {
+      const maxOrder = banners ? Math.max(...banners.map(b => b.display_order), 0) : 0;
       const { data, error } = await supabase
         .from('banner_slides')
-        .insert([bannerData])
+        .insert([{ ...bannerData, display_order: maxOrder + 1 }])
         .select()
         .single();
       
@@ -59,6 +60,7 @@ const BannerManagement = () => {
       resetForm();
     },
     onError: (error: any) => {
+      console.error('Create banner error:', error);
       toast({
         title: 'Error creating banner',
         description: error.message,
@@ -85,9 +87,10 @@ const BannerManagement = () => {
       resetForm();
     },
     onError: (error: any) => {
+      console.error('Update banner error:', error);
       toast({
         title: 'Error updating banner',
-        description: error.message,
+        description: error.message || 'Failed to update banner',
         variant: 'destructive'
       });
     }
@@ -116,13 +119,19 @@ const BannerManagement = () => {
   });
 
   const updateOrderMutation = useMutation({
-    mutationFn: async ({ id, display_order }: { id: string; display_order: number }) => {
-      const { error } = await supabase
-        .from('banner_slides')
-        .update({ display_order })
-        .eq('id', id);
+    mutationFn: async (updates: Array<{ id: string; display_order: number }>) => {
+      const promises = updates.map(({ id, display_order }) =>
+        supabase
+          .from('banner_slides')
+          .update({ display_order })
+          .eq('id', id)
+      );
       
-      if (error) throw error;
+      const results = await Promise.all(promises);
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error('Failed to update order');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banner-slides'] });
@@ -170,8 +179,7 @@ const BannerManagement = () => {
     if (selectedBanner) {
       updateBannerMutation.mutate({ ...formData, id: selectedBanner.id });
     } else {
-      const maxOrder = banners ? Math.max(...banners.map(b => b.display_order), 0) : 0;
-      createBannerMutation.mutate({ ...formData, display_order: maxOrder + 1 });
+      createBannerMutation.mutate(formData);
     }
   };
 
@@ -179,8 +187,10 @@ const BannerManagement = () => {
     const currentIndex = banners?.findIndex(b => b.id === banner.id) || 0;
     if (currentIndex > 0 && banners) {
       const prevBanner = banners[currentIndex - 1];
-      updateOrderMutation.mutate({ id: banner.id, display_order: prevBanner.display_order });
-      updateOrderMutation.mutate({ id: prevBanner.id, display_order: banner.display_order });
+      updateOrderMutation.mutate([
+        { id: banner.id, display_order: prevBanner.display_order },
+        { id: prevBanner.id, display_order: banner.display_order }
+      ]);
     }
   };
 
@@ -188,8 +198,10 @@ const BannerManagement = () => {
     const currentIndex = banners?.findIndex(b => b.id === banner.id) || 0;
     if (banners && currentIndex < banners.length - 1) {
       const nextBanner = banners[currentIndex + 1];
-      updateOrderMutation.mutate({ id: banner.id, display_order: nextBanner.display_order });
-      updateOrderMutation.mutate({ id: nextBanner.id, display_order: banner.display_order });
+      updateOrderMutation.mutate([
+        { id: banner.id, display_order: nextBanner.display_order },
+        { id: nextBanner.id, display_order: banner.display_order }
+      ]);
     }
   };
 

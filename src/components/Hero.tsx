@@ -1,194 +1,181 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Calendar, Users, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface BannerSlide {
+  id: string;
+  title: string;
+  subtitle: string;
+  image_url: string;
+  button_text: string;
+  button_link: string;
+  is_active: boolean;
+  display_order: number;
+}
+
 const Hero = () => {
+  const [slides, setSlides] = useState<BannerSlide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  const { data: slides, isLoading } = useQuery({
-    queryKey: ['banner-slides'],
-    queryFn: async () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBannerSlides();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [slides.length]);
+
+  const fetchBannerSlides = async () => {
+    try {
       const { data, error } = await supabase
         .from('banner_slides')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
-      
+
       if (error) throw error;
-      return data || [];
+
+      if (data && data.length > 0) {
+        setSlides(data);
+      } else {
+        // Fallback slide if no banners are configured
+        setSlides([{
+          id: 'fallback',
+          title: 'Welcome to Flights Nepal',
+          subtitle: 'Your Gateway to Nepal\'s Wonders - Discover breathtaking adventures with our comprehensive travel services',
+          image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80',
+          button_text: 'Explore Services',
+          button_link: '/services',
+          is_active: true,
+          display_order: 1
+        }]);
+      }
+    } catch (error) {
+      console.error('Error fetching banner slides:', error);
+      // Fallback slide on error
+      setSlides([{
+        id: 'fallback',
+        title: 'Welcome to Flights Nepal',
+        subtitle: 'Your Gateway to Nepal\'s Wonders',
+        image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
+        button_text: 'Explore Services',
+        button_link: '/services',
+        is_active: true,
+        display_order: 1
+      }]);
+    } finally {
+      setLoading(false);
     }
-  });
-
-  useEffect(() => {
-    if (!slides || slides.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [slides]);
+  };
 
   const nextSlide = () => {
-    if (slides && slides.length > 1) {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    if (slides && slides.length > 1) {
-      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    }
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const currentSlideData = slides?.[currentSlide];
-  
-  if (isLoading) {
+  if (loading) {
     return (
-      <section id="home" className="relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 lg:pt-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"></div>
-        <div className="relative z-10 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        </div>
+      <section className="relative h-screen flex items-center justify-center bg-muted">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </section>
     );
   }
 
+  const currentSlideData = slides[currentSlide];
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 lg:pt-24">
-      {/* Background Image Slider */}
-      <div className="absolute inset-0">
-        {slides?.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{
-              backgroundImage: `url("${slide.image_url}")`,
-            }}
-          >
-            <div className="absolute inset-0 bg-black/50"></div>
+    <section className="relative h-screen overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${currentSlideData.image_url})` 
+        }}
+      />
+      
+      {/* Content */}
+      <div className="relative z-10 h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-white via-blue-100 to-primary-foreground bg-clip-text text-transparent">
+              {currentSlideData.title}
+            </span>
+          </h1>
+          
+          {currentSlideData.subtitle && (
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
+              {currentSlideData.subtitle}
+            </p>
+          )}
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {currentSlideData.button_text && currentSlideData.button_link && (
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold"
+                onClick={() => window.location.href = currentSlideData.button_link}
+              >
+                {currentSlideData.button_text}
+              </Button>
+            )}
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-3 text-lg font-semibold"
+              onClick={() => window.location.href = '/contact'}
+            >
+              Get Quote
+            </Button>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Slider Controls */}
-      {slides && slides.length > 1 && (
+      {/* Navigation Arrows - Only show if multiple slides */}
+      {slides.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors p-2 rounded-full bg-black/20 hover:bg-black/40"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white p-3 rounded-full backdrop-blur-sm transition-all"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
+            <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors p-2 rounded-full bg-black/20 hover:bg-black/40"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white p-3 rounded-full backdrop-blur-sm transition-all"
             aria-label="Next slide"
           >
-            <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
+            <ChevronRight className="h-6 w-6" />
           </button>
         </>
       )}
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center text-white">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in">
-            {currentSlideData?.title || 'Welcome to Prabas Travels'}
-          </h1>
-          
-          {currentSlideData?.subtitle && (
-            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 px-4">
-              {currentSlideData.subtitle}
-            </p>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
-            {currentSlideData?.button_text && currentSlideData?.button_link && (
-              <Link to={currentSlideData.button_link}>
-                <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary/90">
-                  {currentSlideData.button_text}
-                </Button>
-              </Link>
-            )}
-            <Link to="/prabas-holidays">
-              <Button
-                size="lg"
-                variant="outline" 
-                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-white text-white hover:bg-white hover:text-primary"
-              >
-                Holiday Packages
-              </Button>
-            </Link>
-          </div>
-
-          {/* Slide Indicators */}
-          {slides && slides.length > 1 && (
-            <div className="flex justify-center space-x-2 mb-8 sm:mb-12">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-                    index === currentSlide ? 'bg-accent' : 'bg-white/50'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
-            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-3 sm:p-4 text-center">
-                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
-                <div className="text-lg sm:text-2xl font-bold">12</div>
-                <div className="text-xs sm:text-sm opacity-80">Years Experience</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-3 sm:p-4 text-center">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
-                <div className="text-lg sm:text-2xl font-bold">50K+</div>
-                <div className="text-xs sm:text-sm opacity-80">Happy Travelers</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-3 sm:p-4 text-center">
-                <MapPin className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
-                <div className="text-lg sm:text-2xl font-bold">100+</div>
-                <div className="text-xs sm:text-sm opacity-80">Destinations</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-3 sm:p-4 text-center">
-                <Star className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
-                <div className="text-lg sm:text-2xl font-bold">4.9</div>
-                <div className="text-xs sm:text-sm opacity-80">Rating</div>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Slide Indicators - Only show if multiple slides */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white rounded-full flex justify-center">
-          <div className="w-1 h-2 sm:h-3 bg-white rounded-full mt-2 animate-pulse"></div>
-        </div>
-      </div>
+      )}
     </section>
   );
 };

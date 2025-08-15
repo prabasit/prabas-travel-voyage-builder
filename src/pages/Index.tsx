@@ -2,8 +2,11 @@
 import React from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
-import AboutSection from '../components/AboutSection';
 import ServicesSection from '../components/ServicesSection';
+import AboutSection from '../components/AboutSection';
+import TestimonialsCarousel from '../components/TestimonialsCarousel';
+import ContactSection from '../components/ContactSection';
+import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
 
 const Index = () => {
@@ -11,8 +14,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <AboutSection />
       <ServicesSection />
+      <AboutSection />
+      <TestimonialsCarousel />
+      <ContactSection />
+      <Newsletter />
       <Footer />
     </div>
   );
