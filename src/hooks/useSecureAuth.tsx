@@ -83,7 +83,6 @@ export const useSecureAuth = () => {
       if (sessionData) {
         const session: AdminSession = JSON.parse(sessionData);
         
-        // Check if session is expired (24 hours) or inactive (20 minutes)
         const isExpired = Date.now() > session.expires_at;
         const timeSinceLastActivity = Date.now() - (session.last_activity || session.expires_at - (24 * 60 * 60 * 1000));
         const isInactive = timeSinceLastActivity > SESSION_TIMEOUT;
@@ -93,7 +92,6 @@ export const useSecureAuth = () => {
           setIsAuthenticated(false);
           setAdminUser(null);
         } else {
-          // Update last activity time
           const updatedSession = {
             ...session,
             last_activity: Date.now()
@@ -124,49 +122,17 @@ export const useSecureAuth = () => {
         return false;
       }
 
-      if (!email.includes('@')) {
-        toast({
-          title: "Validation Error",
-          description: "Please enter a valid email address",
-          variant: "destructive",
-        });
-        return false;
-      }
+      // Direct query to admin_users table with fixed RLS
+      const { data: adminUser, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', email.toLowerCase().trim())
+        .eq('password_hash', password)
+        .eq('is_active', true)
+        .single();
 
-      const { data, error } = await supabase.rpc('admin_login', {
-        login_email: email,
-        login_password: password
-      });
-
-      if (error) {
+      if (error || !adminUser) {
         console.error('Login error:', error);
-        toast({
-          title: "Login Error",
-          description: "An error occurred during login",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      if (data && data.length > 0 && data[0].success) {
-        const userData = data[0].user_data;
-        const now = Date.now();
-        const session: AdminSession = {
-          ...userData,
-          expires_at: now + (24 * 60 * 60 * 1000), // 24 hours
-          last_activity: now
-        };
-
-        localStorage.setItem('admin_session', JSON.stringify(session));
-        setAdminUser(session);
-        setIsAuthenticated(true);
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Admin Dashboard",
-        });
-        return true;
-      } else {
         toast({
           title: "Login Failed",
           description: "Invalid email or password",
@@ -174,6 +140,26 @@ export const useSecureAuth = () => {
         });
         return false;
       }
+
+      const now = Date.now();
+      const session: AdminSession = {
+        id: adminUser.id,
+        email: adminUser.email,
+        role: adminUser.role,
+        is_active: adminUser.is_active,
+        expires_at: now + (24 * 60 * 60 * 1000), // 24 hours
+        last_activity: now
+      };
+
+      localStorage.setItem('admin_session', JSON.stringify(session));
+      setAdminUser(session);
+      setIsAuthenticated(true);
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome to Admin Dashboard",
+      });
+      return true;
     } catch (error) {
       console.error('Login error:', error);
       toast({

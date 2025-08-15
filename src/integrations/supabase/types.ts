@@ -130,8 +130,7 @@ export type Database = {
       }
       banner_slides: {
         Row: {
-          button_link: string | null
-          button_text: string | null
+          buttons: Json | null
           created_at: string
           display_order: number
           id: string
@@ -142,8 +141,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          button_link?: string | null
-          button_text?: string | null
+          buttons?: Json | null
           created_at?: string
           display_order?: number
           id?: string
@@ -154,8 +152,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          button_link?: string | null
-          button_text?: string | null
+          buttons?: Json | null
           created_at?: string
           display_order?: number
           id?: string

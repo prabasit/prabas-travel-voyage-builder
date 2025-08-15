@@ -4,13 +4,18 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface BannerButton {
+  text: string;
+  link: string;
+  style: 'primary' | 'secondary' | 'accent';
+}
+
 interface BannerSlide {
   id: string;
   title: string;
   subtitle: string;
   image_url: string;
-  button_text: string;
-  button_link: string;
+  buttons: BannerButton[];
   is_active: boolean;
   display_order: number;
 }
@@ -44,16 +49,22 @@ const Hero = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setSlides(data);
+        const processedSlides = data.map(slide => ({
+          ...slide,
+          buttons: Array.isArray(slide.buttons) ? slide.buttons : []
+        }));
+        setSlides(processedSlides);
       } else {
-        // Fallback slide if no banners are configured
+        // Fallback slide with multiple buttons
         setSlides([{
           id: 'fallback',
           title: 'Welcome to Flights Nepal',
           subtitle: 'Your Gateway to Nepal\'s Wonders - Discover breathtaking adventures with our comprehensive travel services',
           image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80',
-          button_text: 'Explore Services',
-          button_link: '/services',
+          buttons: [
+            { text: 'Explore Services', link: '/services', style: 'primary' },
+            { text: 'Our Team', link: '/team', style: 'secondary' }
+          ],
           is_active: true,
           display_order: 1
         }]);
@@ -66,8 +77,10 @@ const Hero = () => {
         title: 'Welcome to Flights Nepal',
         subtitle: 'Your Gateway to Nepal\'s Wonders',
         image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
-        button_text: 'Explore Services',
-        button_link: '/services',
+        buttons: [
+          { text: 'Explore Services', link: '/services', style: 'primary' },
+          { text: 'Contact Us', link: '/contact', style: 'accent' }
+        ],
         is_active: true,
         display_order: 1
       }]);
@@ -82,6 +95,19 @@ const Hero = () => {
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const getButtonClassName = (style: string) => {
+    switch (style) {
+      case 'primary':
+        return 'bg-primary hover:bg-primary/90 text-primary-foreground';
+      case 'secondary':
+        return 'bg-secondary hover:bg-secondary/90 text-secondary-foreground';
+      case 'accent':
+        return 'bg-orange-500 hover:bg-orange-600 text-white';
+      default:
+        return 'bg-primary hover:bg-primary/90 text-primary-foreground';
+    }
   };
 
   if (loading) {
@@ -119,25 +145,20 @@ const Hero = () => {
             </p>
           )}
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            {currentSlideData.button_text && currentSlideData.button_link && (
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold"
-                onClick={() => window.location.href = currentSlideData.button_link}
-              >
-                {currentSlideData.button_text}
-              </Button>
-            )}
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-3 text-lg font-semibold"
-              onClick={() => window.location.href = '/contact'}
-            >
-              Get Quote
-            </Button>
-          </div>
+          {currentSlideData.buttons && currentSlideData.buttons.length > 0 && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {currentSlideData.buttons.map((button, index) => (
+                <Button 
+                  key={index}
+                  size="lg" 
+                  className={`${getButtonClassName(button.style)} px-8 py-3 text-lg font-semibold`}
+                  onClick={() => window.location.href = button.link}
+                >
+                  {button.text}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
