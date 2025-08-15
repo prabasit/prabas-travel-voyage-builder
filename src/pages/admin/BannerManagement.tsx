@@ -7,12 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, MoveUp, MoveDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Edit, Trash2, MoveUp, MoveDown, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileUpload } from '@/components/ui/file-upload';
+
+interface BannerButton {
+  text: string;
+  link: string;
+  style: 'primary' | 'secondary' | 'outline';
+}
 
 const BannerManagement = () => {
   const [selectedBanner, setSelectedBanner] = useState<any>(null);
@@ -21,8 +28,7 @@ const BannerManagement = () => {
     title: '',
     subtitle: '',
     image_url: '',
-    button_text: '',
-    button_link: '',
+    buttons: [] as BannerButton[],
     is_active: true,
     display_order: 0
   });
@@ -150,8 +156,7 @@ const BannerManagement = () => {
       title: '',
       subtitle: '',
       image_url: '',
-      button_text: '',
-      button_link: '',
+      buttons: [],
       is_active: true,
       display_order: 0
     });
@@ -165,12 +170,29 @@ const BannerManagement = () => {
       title: banner.title,
       subtitle: banner.subtitle || '',
       image_url: banner.image_url,
-      button_text: banner.button_text || '',
-      button_link: banner.button_link || '',
+      buttons: Array.isArray(banner.buttons) ? banner.buttons : [],
       is_active: banner.is_active,
       display_order: banner.display_order
     });
     setIsDialogOpen(true);
+  };
+
+  const addButton = () => {
+    setFormData({
+      ...formData,
+      buttons: [...formData.buttons, { text: '', link: '', style: 'primary' }]
+    });
+  };
+
+  const updateButton = (index: number, field: keyof BannerButton, value: string) => {
+    const updatedButtons = [...formData.buttons];
+    updatedButtons[index] = { ...updatedButtons[index], [field]: value };
+    setFormData({ ...formData, buttons: updatedButtons });
+  };
+
+  const removeButton = (index: number) => {
+    const updatedButtons = formData.buttons.filter((_, i) => i !== index);
+    setFormData({ ...formData, buttons: updatedButtons });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -221,7 +243,7 @@ const BannerManagement = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Banner Management</h1>
-            <p className="text-muted-foreground">Manage home page slider banners</p>
+            <p className="text-muted-foreground">Manage home page slider banners with custom buttons</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -230,31 +252,34 @@ const BannerManagement = () => {
                 Add Banner
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {selectedBanner ? 'Edit Banner' : 'Create New Banner'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subtitle">Subtitle</Label>
+                    <Textarea
+                      id="subtitle"
+                      value={formData.subtitle}
+                      onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="subtitle">Subtitle</Label>
-                  <Textarea
-                    id="subtitle"
-                    value={formData.subtitle}
-                    onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                    rows={3}
-                  />
-                </div>
+                
                 <div>
                   <FileUpload
                     onFileUpload={(url) => setFormData({ ...formData, image_url: url })}
@@ -264,25 +289,65 @@ const BannerManagement = () => {
                     label="Banner Image (Max 10MB)"
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="button_text">Button Text</Label>
-                    <Input
-                      id="button_text"
-                      value={formData.button_text}
-                      onChange={(e) => setFormData({ ...formData, button_text: e.target.value })}
-                    />
+
+                {/* Buttons Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-lg font-semibold">Action Buttons</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={addButton}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Button
+                    </Button>
                   </div>
-                  <div>
-                    <Label htmlFor="button_link">Button Link</Label>
-                    <Input
-                      id="button_link"
-                      value={formData.button_link}
-                      onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
-                      placeholder="/page-url"
-                    />
-                  </div>
+                  
+                  {formData.buttons.map((button, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                          <Label>Button Text</Label>
+                          <Input
+                            value={button.text}
+                            onChange={(e) => updateButton(index, 'text', e.target.value)}
+                            placeholder="Button text"
+                          />
+                        </div>
+                        <div>
+                          <Label>Link</Label>
+                          <Input
+                            value={button.link}
+                            onChange={(e) => updateButton(index, 'link', e.target.value)}
+                            placeholder="/page-url"
+                          />
+                        </div>
+                        <div>
+                          <Label>Style</Label>
+                          <Select
+                            value={button.style}
+                            onValueChange={(value) => updateButton(index, 'style', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="primary">Primary (Blue)</SelectItem>
+                              <SelectItem value="secondary">Secondary (Orange)</SelectItem>
+                              <SelectItem value="outline">Outline</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeButton(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_active"
@@ -291,6 +356,7 @@ const BannerManagement = () => {
                   />
                   <Label htmlFor="is_active">Active</Label>
                 </div>
+                
                 <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
@@ -368,9 +434,9 @@ const BannerManagement = () => {
                     }`}>
                       {banner.is_active ? 'Active' : 'Inactive'}
                     </span>
-                    {banner.button_text && (
+                    {Array.isArray(banner.buttons) && banner.buttons.length > 0 && (
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        Button: {banner.button_text}
+                        {banner.buttons.length} Button{banner.buttons.length !== 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
@@ -378,6 +444,19 @@ const BannerManagement = () => {
                     Order: {banner.display_order}
                   </span>
                 </div>
+                {Array.isArray(banner.buttons) && banner.buttons.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {banner.buttons.map((btn: any, btnIndex: number) => (
+                      <span key={btnIndex} className={`text-xs px-2 py-1 rounded ${
+                        btn.style === 'primary' ? 'bg-blue-100 text-blue-800' :
+                        btn.style === 'secondary' ? 'bg-orange-100 text-orange-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {btn.text}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
