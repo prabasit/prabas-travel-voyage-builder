@@ -154,25 +154,6 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Values Section */}
-        {aboutData.values && aboutData.values.length > 0 && (
-          <div className="mb-16">
-            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {aboutData.values.map((value, index) => (
-                <Card key={index} className="text-center">
-                  <CardContent className="p-6">
-                    <div className="flex justify-center mb-4 text-primary">
-                      {getIconComponent(value.icon)}
-                    </div>
-                    <h4 className="font-semibold mb-2">{value.title}</h4>
-                    <p className="text-sm text-muted-foreground">{value.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Stats Section */}
         {aboutData.stats && aboutData.stats.length > 0 && (
