@@ -1,11 +1,11 @@
 
-import React from 'react';
-import { Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, User, Shield, ArrowLeft, Home } from 'lucide-react';
+import { LogOut, User, Shield } from 'lucide-react';
+import AdminSidebar from './AdminSidebar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { isAuthenticated, adminUser, loading, logout } = useSecureAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (loading) {
     return (
@@ -28,71 +28,57 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const isOnDashboard = location.pathname === '/admin/dashboard';
-  const canGoBack = !isOnDashboard && location.pathname !== '/admin/login';
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Admin Header */}
-      <header className="bg-card border-b border-border px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <img 
-              src="/lovable-uploads/7711519c-8e72-4555-9eea-86af600c90c1.png" 
-              alt="Prabas Travels Logo" 
-              className="h-8"
-            />
-            <div className="flex items-center space-x-2">
-              {canGoBack && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate(-1)}
-                  className="flex items-center space-x-1"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex items-center space-x-1"
-              >
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Button>
-            </div>
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <User className="h-4 w-4" />
-              <span className="text-sm font-medium">{adminUser?.email}</span>
-              <Badge variant="secondary" className="flex items-center space-x-1">
-                <Shield className="h-3 w-3" />
-                <span>{adminUser?.role}</span>
-              </Badge>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={logout}
-              className="flex items-center space-x-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <AdminSidebar 
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
 
       {/* Main Content */}
-      <main className="p-6">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="bg-card border-b border-border px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold truncate">Admin Dashboard</h1>
+            </div>
+            
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="hidden sm:flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span className="text-sm font-medium truncate max-w-32">{adminUser?.email}</span>
+                <Badge variant="secondary" className="flex items-center space-x-1">
+                  <Shield className="h-3 w-3" />
+                  <span className="hidden sm:inline">{adminUser?.role}</span>
+                </Badge>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="flex items-center space-x-1 sm:space-x-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

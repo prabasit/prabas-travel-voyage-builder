@@ -9,7 +9,10 @@ interface AdminSession {
   role: string;
   is_active: boolean;
   expires_at: number;
+  last_activity: number;
 }
+
+const SESSION_TIMEOUT = 20 * 60 * 1000; // 20 minutes in milliseconds
 
 export const useSecureAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,7 +22,60 @@ export const useSecureAuth = () => {
 
   useEffect(() => {
     checkAuthStatus();
-  }, []);
+    
+    // Check for inactivity every minute
+    const activityInterval = setInterval(() => {
+      checkForInactivity();
+    }, 60000);
+
+    // Track user activity
+    const trackActivity = () => {
+      if (adminUser) {
+        const updatedSession = {
+          ...adminUser,
+          last_activity: Date.now()
+        };
+        localStorage.setItem('admin_session', JSON.stringify(updatedSession));
+        setAdminUser(updatedSession);
+      }
+    };
+
+    // Add activity listeners
+    document.addEventListener('mousedown', trackActivity);
+    document.addEventListener('keydown', trackActivity);
+    document.addEventListener('scroll', trackActivity);
+    document.addEventListener('touchstart', trackActivity);
+
+    return () => {
+      clearInterval(activityInterval);
+      document.removeEventListener('mousedown', trackActivity);
+      document.removeEventListener('keydown', trackActivity);
+      document.removeEventListener('scroll', trackActivity);
+      document.removeEventListener('touchstart', trackActivity);
+    };
+  }, [adminUser]);
+
+  const checkForInactivity = () => {
+    const sessionData = localStorage.getItem('admin_session');
+    if (sessionData) {
+      try {
+        const session: AdminSession = JSON.parse(sessionData);
+        const timeSinceLastActivity = Date.now() - session.last_activity;
+        
+        if (timeSinceLastActivity > SESSION_TIMEOUT) {
+          logout();
+          toast({
+            title: "Session Expired",
+            description: "Your session has expired due to inactivity. Please log in again.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error checking inactivity:', error);
+        logout();
+      }
+    }
+  };
 
   const checkAuthStatus = () => {
     try {
@@ -27,15 +83,24 @@ export const useSecureAuth = () => {
       if (sessionData) {
         const session: AdminSession = JSON.parse(sessionData);
         
-        // Check if session is expired (24 hours)
-        if (Date.now() < session.expires_at) {
-          setAdminUser(session);
-          setIsAuthenticated(true);
-        } else {
-          // Session expired, clear it
+        // Check if session is expired (24 hours) or inactive (20 minutes)
+        const isExpired = Date.now() > session.expires_at;
+        const timeSinceLastActivity = Date.now() - (session.last_activity || session.expires_at - (24 * 60 * 60 * 1000));
+        const isInactive = timeSinceLastActivity > SESSION_TIMEOUT;
+        
+        if (isExpired || isInactive) {
           localStorage.removeItem('admin_session');
           setIsAuthenticated(false);
           setAdminUser(null);
+        } else {
+          // Update last activity time
+          const updatedSession = {
+            ...session,
+            last_activity: Date.now()
+          };
+          localStorage.setItem('admin_session', JSON.stringify(updatedSession));
+          setAdminUser(updatedSession);
+          setIsAuthenticated(true);
         }
       }
     } catch (error) {
@@ -50,7 +115,6 @@ export const useSecureAuth = () => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Input validation
       if (!email || !password) {
         toast({
           title: "Validation Error",
@@ -69,7 +133,6 @@ export const useSecureAuth = () => {
         return false;
       }
 
-      // Use the secure database function
       const { data, error } = await supabase.rpc('admin_login', {
         login_email: email,
         login_password: password
@@ -87,9 +150,11 @@ export const useSecureAuth = () => {
 
       if (data && data.length > 0 && data[0].success) {
         const userData = data[0].user_data;
+        const now = Date.now();
         const session: AdminSession = {
           ...userData,
-          expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+          expires_at: now + (24 * 60 * 60 * 1000), // 24 hours
+          last_activity: now
         };
 
         localStorage.setItem('admin_session', JSON.stringify(session));

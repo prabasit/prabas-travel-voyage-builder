@@ -17,7 +17,7 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({
   onFileUpload,
   acceptedTypes = "image/*,.pdf,.doc,.docx",
-  maxSize = 52428800, // 50MB
+  maxSize = 10485760, // 10MB default
   currentFile,
   label = "Upload File"
 }) => {
@@ -118,7 +118,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
             dragActive ? 'border-primary bg-primary/5' : 'border-gray-300'
           }`}
           onDragEnter={handleDrag}
@@ -126,7 +126,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
           <p className="text-sm text-gray-600 mb-2">
             Drag and drop a file here, or click to select
           </p>
@@ -147,6 +147,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </Button>
         </div>
       )}
+      <p className="text-xs text-gray-500">
+        Max file size: {maxSize / 1024 / 1024}MB
+      </p>
     </div>
   );
 };

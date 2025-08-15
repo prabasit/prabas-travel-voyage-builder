@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, MoveUp, MoveDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +16,7 @@ import { FileUpload } from '@/components/ui/file-upload';
 
 const BannerManagement = () => {
   const [selectedBanner, setSelectedBanner] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -125,7 +126,6 @@ const BannerManagement = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banner-slides'] });
-      toast({ title: 'Banner order updated' });
     },
     onError: (error: any) => {
       toast({
@@ -147,7 +147,7 @@ const BannerManagement = () => {
       display_order: 0
     });
     setSelectedBanner(null);
-    setIsEditing(false);
+    setIsDialogOpen(false);
   };
 
   const handleEdit = (banner: any) => {
@@ -161,7 +161,7 @@ const BannerManagement = () => {
       is_active: banner.is_active,
       display_order: banner.display_order
     });
-    setIsEditing(true);
+    setIsDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -170,19 +170,17 @@ const BannerManagement = () => {
     if (selectedBanner) {
       updateBannerMutation.mutate({ ...formData, id: selectedBanner.id });
     } else {
-      const maxOrder = banners ? Math.max(...banners.map(b => b.display_order)) : 0;
+      const maxOrder = banners ? Math.max(...banners.map(b => b.display_order), 0) : 0;
       createBannerMutation.mutate({ ...formData, display_order: maxOrder + 1 });
     }
   };
 
   const moveUp = (banner: any) => {
     const currentIndex = banners?.findIndex(b => b.id === banner.id) || 0;
-    if (currentIndex > 0) {
-      const prevBanner = banners?.[currentIndex - 1];
-      if (prevBanner) {
-        updateOrderMutation.mutate({ id: banner.id, display_order: prevBanner.display_order });
-        updateOrderMutation.mutate({ id: prevBanner.id, display_order: banner.display_order });
-      }
+    if (currentIndex > 0 && banners) {
+      const prevBanner = banners[currentIndex - 1];
+      updateOrderMutation.mutate({ id: banner.id, display_order: prevBanner.display_order });
+      updateOrderMutation.mutate({ id: prevBanner.id, display_order: banner.display_order });
     }
   };
 
@@ -190,10 +188,8 @@ const BannerManagement = () => {
     const currentIndex = banners?.findIndex(b => b.id === banner.id) || 0;
     if (banners && currentIndex < banners.length - 1) {
       const nextBanner = banners[currentIndex + 1];
-      if (nextBanner) {
-        updateOrderMutation.mutate({ id: banner.id, display_order: nextBanner.display_order });
-        updateOrderMutation.mutate({ id: nextBanner.id, display_order: banner.display_order });
-      }
+      updateOrderMutation.mutate({ id: banner.id, display_order: nextBanner.display_order });
+      updateOrderMutation.mutate({ id: nextBanner.id, display_order: banner.display_order });
     }
   };
 
@@ -210,19 +206,19 @@ const BannerManagement = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Banner Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Banner Management</h1>
             <p className="text-muted-foreground">Manage home page slider banners</p>
           </div>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setIsEditing(true); }}>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add New Banner
+                Add Banner
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {selectedBanner ? 'Edit Banner' : 'Create New Banner'}
@@ -248,16 +244,15 @@ const BannerManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="image">Banner Image</Label>
                   <FileUpload
                     onFileUpload={(url) => setFormData({ ...formData, image_url: url })}
                     currentFile={formData.image_url}
                     acceptedTypes="image/*"
-                    maxSize={5}
-                    label="Upload banner image"
+                    maxSize={10485760}
+                    label="Banner Image (Max 10MB)"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="button_text">Button Text</Label>
                     <Input
@@ -284,7 +279,7 @@ const BannerManagement = () => {
                   />
                   <Label htmlFor="is_active">Active</Label>
                 </div>
-                <div className="flex justify-end space-x-2">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
                   </Button>
@@ -301,23 +296,23 @@ const BannerManagement = () => {
           {banners?.map((banner, index) => (
             <Card key={banner.id}>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex items-center space-x-4 min-w-0 flex-1">
                     {banner.image_url && (
                       <img 
                         src={banner.image_url} 
                         alt={banner.title}
-                        className="w-16 h-16 object-cover rounded"
+                        className="w-16 h-16 object-cover rounded flex-shrink-0"
                       />
                     )}
-                    <div>
-                      <CardTitle>{banner.title}</CardTitle>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="truncate">{banner.title}</CardTitle>
                       {banner.subtitle && (
-                        <p className="text-sm text-muted-foreground">{banner.subtitle}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{banner.subtitle}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -352,8 +347,8 @@ const BannerManagement = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs ${
                       banner.is_active 
                         ? 'bg-green-100 text-green-800' 

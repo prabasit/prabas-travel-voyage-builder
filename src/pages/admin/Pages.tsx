@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 const Pages = () => {
   const [selectedPage, setSelectedPage] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -121,7 +121,7 @@ const Pages = () => {
       is_published: false
     });
     setSelectedPage(null);
-    setIsEditing(false);
+    setIsDialogOpen(false);
   };
 
   const handleEdit = (page: any) => {
@@ -133,7 +133,7 @@ const Pages = () => {
       meta_description: page.meta_description || '',
       is_published: page.is_published
     });
-    setIsEditing(true);
+    setIsDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -166,26 +166,26 @@ const Pages = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Pages Management</h1>
-            <p className="text-muted-foreground">Manage website pages</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Pages Management</h1>
+            <p className="text-muted-foreground">Create and manage website pages</p>
           </div>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setIsEditing(true); }}>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add New Page
+                Add Page
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {selectedPage ? 'Edit Page' : 'Create New Page'}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="title">Title</Label>
                     <Input
@@ -237,7 +237,7 @@ const Pages = () => {
                   />
                   <Label htmlFor="is_published">Published</Label>
                 </div>
-                <div className="flex justify-end space-x-2">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
                   </Button>
@@ -254,12 +254,15 @@ const Pages = () => {
           {pages?.map((page) => (
             <Card key={page.id}>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{page.title}</CardTitle>
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="truncate">{page.title}</CardTitle>
                     <p className="text-sm text-muted-foreground">/{page.slug}</p>
+                    {page.meta_description && (
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{page.meta_description}</p>
+                    )}
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -285,8 +288,7 @@ const Pages = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">{page.meta_description}</p>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <span className={`px-2 py-1 rounded text-xs ${
                     page.is_published 
                       ? 'bg-green-100 text-green-800' 

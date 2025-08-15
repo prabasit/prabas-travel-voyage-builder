@@ -50,7 +50,7 @@ const Hero = () => {
   
   if (isLoading) {
     return (
-      <section id="home" className="relative min-h-screen flex items-center justify-center pt-24">
+      <section id="home" className="relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 lg:pt-24">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"></div>
         <div className="relative z-10 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -60,7 +60,7 @@ const Hero = () => {
   }
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center pt-24">
+    <section id="home" className="relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 lg:pt-24">
       {/* Background Image Slider */}
       <div className="absolute inset-0">
         {slides?.map((slide, index) => (
@@ -83,15 +83,17 @@ const Hero = () => {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors"
+            className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors p-2 rounded-full bg-black/20 hover:bg-black/40"
+            aria-label="Previous slide"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors"
+            className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 text-white hover:text-accent transition-colors p-2 rounded-full bg-black/20 hover:bg-black/40"
+            aria-label="Next slide"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
           </button>
         </>
       )}
@@ -99,81 +101,82 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in">
             {currentSlideData?.title || 'Welcome to Prabas Travels'}
           </h1>
           
           {currentSlideData?.subtitle && (
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 px-4">
               {currentSlideData.subtitle}
             </p>
           )}
 
-          {currentSlideData?.button_text && currentSlideData?.button_link && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
+            {currentSlideData?.button_text && currentSlideData?.button_link && (
               <Link to={currentSlideData.button_link}>
-                <Button size="lg" className="text-lg px-8 py-4 bg-primary hover:bg-primary/90">
+                <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary/90">
                   {currentSlideData.button_text}
                 </Button>
               </Link>
-              <Link to="/prabas-holidays">
-                <Button
-                  size="lg"
-                  variant="outline" 
-                  className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary"
-                >
-                  Holiday Packages
-                </Button>
-              </Link>
-            </div>
-          )}
+            )}
+            <Link to="/prabas-holidays">
+              <Button
+                size="lg"
+                variant="outline" 
+                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-white text-white hover:bg-white hover:text-primary"
+              >
+                Holiday Packages
+              </Button>
+            </Link>
+          </div>
 
           {/* Slide Indicators */}
           {slides && slides.length > 1 && (
-            <div className="flex justify-center space-x-2 mb-12">
+            <div className="flex justify-center space-x-2 mb-8 sm:mb-12">
               {slides.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
+                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
                     index === currentSlide ? 'bg-accent' : 'bg-white/50'
                   }`}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
           )}
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
             <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-4 text-center">
-                <Calendar className="h-8 w-8 mx-auto mb-2 text-accent" />
-                <div className="text-2xl font-bold">12</div>
-                <div className="text-sm opacity-80">Years Experience</div>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
+                <div className="text-lg sm:text-2xl font-bold">12</div>
+                <div className="text-xs sm:text-sm opacity-80">Years Experience</div>
               </CardContent>
             </Card>
             
             <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-4 text-center">
-                <Users className="h-8 w-8 mx-auto mb-2 text-accent" />
-                <div className="text-2xl font-bold">50K+</div>
-                <div className="text-sm opacity-80">Happy Travelers</div>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
+                <div className="text-lg sm:text-2xl font-bold">50K+</div>
+                <div className="text-xs sm:text-sm opacity-80">Happy Travelers</div>
               </CardContent>
             </Card>
             
             <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-4 text-center">
-                <MapPin className="h-8 w-8 mx-auto mb-2 text-accent" />
-                <div className="text-2xl font-bold">100+</div>
-                <div className="text-sm opacity-80">Destinations</div>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <MapPin className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
+                <div className="text-lg sm:text-2xl font-bold">100+</div>
+                <div className="text-xs sm:text-sm opacity-80">Destinations</div>
               </CardContent>
             </Card>
             
             <Card className="bg-white/50 backdrop-blur-sm border-white/30">
-              <CardContent className="p-4 text-center">
-                <Star className="h-8 w-8 mx-auto mb-2 text-accent" />
-                <div className="text-2xl font-bold">4.9</div>
-                <div className="text-sm opacity-80">Rating</div>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-accent" />
+                <div className="text-lg sm:text-2xl font-bold">4.9</div>
+                <div className="text-xs sm:text-sm opacity-80">Rating</div>
               </CardContent>
             </Card>
           </div>
@@ -181,9 +184,9 @@ const Hero = () => {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white rounded-full flex justify-center">
+          <div className="w-1 h-2 sm:h-3 bg-white rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
     </section>
