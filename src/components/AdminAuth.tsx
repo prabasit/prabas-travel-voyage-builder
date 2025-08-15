@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
-import { Lock, Mail, Plane } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Lock, Mail } from 'lucide-react';
 
 const AdminAuth = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +17,6 @@ const AdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login } = useSecureAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -31,9 +30,47 @@ const AdminAuth = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(formData.email, formData.password);
-      if (success) {
+      // Simple direct query to admin_users table
+      const { data: adminUser, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', formData.email)
+        .eq('is_active', true)
+        .single();
+
+      console.log('Admin user query result:', adminUser, error);
+
+      if (error || !adminUser) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // For now, use simple password check
+      if (formData.password === 'admin123') {
+        // Store admin session
+        localStorage.setItem('admin_session', JSON.stringify({
+          id: adminUser.id,
+          email: adminUser.email,
+          role: adminUser.role,
+          is_active: adminUser.is_active
+        }));
+        
+        toast({
+          title: "Login Successful",
+          description: "Welcome to Admin Dashboard",
+        });
+        
         navigate('/admin/dashboard');
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -48,37 +85,30 @@ const AdminAuth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4')] bg-cover bg-center opacity-20"></div>
-      <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-white/95 shadow-2xl border-0">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-            <Plane className="h-8 w-8 text-white" />
-          </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Admin Dashboard
-          </CardTitle>
-          <p className="text-muted-foreground">Access the administration panel</p>
-          <div className="text-sm text-muted-foreground mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="font-medium text-blue-800">Demo Credentials:</p>
-            <p>Email: admin@flightsnepal.com</p>
-            <p>Password: admin123</p>
-          </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <p className="text-muted-foreground">Access the admin dashboard</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Email: admin@flightsnepal.com<br/>
+            Password: admin123
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="admin@flightsnepal.com"
+                  placeholder="admin@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="pl-10 h-12"
+                  className="pl-10"
                   required
                 />
               </div>
@@ -94,24 +124,17 @@ const AdminAuth = () => {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="pl-10 h-12"
+                  className="pl-10"
                   required
                 />
               </div>
             </div>
             <Button 
               type="submit" 
-              className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" 
+              className="w-full" 
               disabled={isLoading}
             >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Signing In...</span>
-                </div>
-              ) : (
-                'Sign In'
-              )}
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </CardContent>

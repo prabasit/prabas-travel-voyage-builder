@@ -55,17 +55,6 @@ export const useSecureAuth = () => {
     };
   }, [adminUser]);
 
-  const setUserContext = async (email: string, role: string) => {
-    try {
-      await supabase.rpc('set_user_context', {
-        user_email: email,
-        user_role: role
-      });
-    } catch (error) {
-      console.error('Error setting user context:', error);
-    }
-  };
-
   const checkForInactivity = () => {
     const sessionData = localStorage.getItem('admin_session');
     if (sessionData) {
@@ -88,7 +77,7 @@ export const useSecureAuth = () => {
     }
   };
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = () => {
     try {
       const sessionData = localStorage.getItem('admin_session');
       if (sessionData) {
@@ -104,9 +93,6 @@ export const useSecureAuth = () => {
           setIsAuthenticated(false);
           setAdminUser(null);
         } else {
-          // Set user context for RLS
-          await setUserContext(session.email, session.role);
-          
           // Update last activity time
           const updatedSession = {
             ...session,
@@ -138,37 +124,38 @@ export const useSecureAuth = () => {
         return false;
       }
 
-      // Direct query to admin_users table
-      const { data: adminUser, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', email.toLowerCase().trim())
-        .eq('is_active', true)
-        .single();
-
-      if (error || !adminUser) {
+      if (!email.includes('@')) {
         toast({
-          title: "Login Failed",
-          description: "Invalid email or password",
+          title: "Validation Error",
+          description: "Please enter a valid email address",
           variant: "destructive",
         });
         return false;
       }
 
-      // Simple password check (in production, use proper hashing)
-      if (password === adminUser.password_hash) {
+      const { data, error } = await supabase.rpc('admin_login', {
+        login_email: email,
+        login_password: password
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        toast({
+          title: "Login Error",
+          description: "An error occurred during login",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (data && data.length > 0 && data[0].success) {
+        const userData = data[0].user_data;
         const now = Date.now();
         const session: AdminSession = {
-          id: adminUser.id,
-          email: adminUser.email,
-          role: adminUser.role,
-          is_active: adminUser.is_active,
+          ...userData,
           expires_at: now + (24 * 60 * 60 * 1000), // 24 hours
           last_activity: now
         };
-
-        // Set user context for RLS
-        await setUserContext(adminUser.email, adminUser.role);
 
         localStorage.setItem('admin_session', JSON.stringify(session));
         setAdminUser(session);
