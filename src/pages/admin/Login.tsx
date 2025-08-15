@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +9,8 @@ import { Lock, Mail } from 'lucide-react';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: 'admin@flightsnepal.com',
-    password: 'admin123'
+    email: '',
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useSecureAuth();
@@ -57,13 +56,12 @@ const Login = () => {
           />
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <p className="text-muted-foreground">Access the admin dashboard</p>
-         
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <div className="relative">
+              <div classmoon
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
@@ -101,6 +99,7 @@ const Login = () => {
               disabled={isLoading}
             >
               {isLoading ? 'Logging in...' : 'Login'}
+siniz
             </Button>
           </form>
         </CardContent>
