@@ -70,22 +70,23 @@ const Header = () => {
                   </Link>
                 </NavigationMenuItem>
 
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Our Businesses</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-64 p-4">
-                      {businessMenuItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+               <NavigationMenuItem>
+  <NavigationMenuTrigger>Our Businesses</NavigationMenuTrigger>
+  <NavigationMenuContent>
+    <div className="w-64 p-4">
+      {businessMenuItems.map((item) => (
+        <Link
+          key={item.name}
+          to={item.href}
+          className="block px-4 py-2 text-sm rounded-md transition-colors hover:bg-[#F15A24] hover:text-white active:bg-[#d94f20]"
+        >
+          {item.name}
+        </Link>
+      ))}
+    </div>
+  </NavigationMenuContent>
+</NavigationMenuItem>
+    
 
                 <NavigationMenuItem>
                   <Link to="/team" className="px-4 py-2 hover:text-primary transition-colors">
