@@ -12,28 +12,72 @@ import { supabase } from '@/integrations/supabase/client';
 import { Plus, X } from 'lucide-react';
 
 interface AboutData {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   story: string;
   mission: string;
   vision: string;
-  values: any[];
-  stats: any[];
+  values: Array<{
+    title: string;
+    description: string;
+    icon?: string;
+  }>;
+  stats: Array<{
+    label: string;
+    value: string;
+    icon?: string;
+  }>;
   image_url: string;
 }
 
 const About = () => {
   const [aboutData, setAboutData] = useState<AboutData>({
-    id: '',
-    title: '',
-    description: '',
-    story: '',
-    mission: '',
-    vision: '',
-    values: [],
-    stats: [],
-    image_url: ''
+    title: 'About Prabas Travels',
+    description: 'Your trusted partner for unforgettable travel experiences across Nepal and beyond.',
+    story: 'Established in 2014, Prabas Travels & Tours has been Nepal\'s premier travel company, dedicated to showcasing the natural beauty and rich cultural heritage of Nepal to travelers from around the world.',
+    mission: 'To provide exceptional travel experiences that connect our clients with the breathtaking landscapes, vibrant cultures, and warm hospitality that Nepal has to offer.',
+    vision: 'To become the leading travel company in Nepal, recognized for our commitment to sustainable tourism, exceptional service, and creating lifelong memories for our clients.',
+    values: [
+      {
+        title: 'Excellence',
+        description: 'We strive for excellence in every service we provide.',
+        icon: 'award'
+      },
+      {
+        title: 'Trust',
+        description: 'Building lasting relationships through trust and reliability.',
+        icon: 'heart'
+      },
+      {
+        title: 'Adventure',
+        description: 'Creating unforgettable adventures for our travelers.',
+        icon: 'globe'
+      }
+    ],
+    stats: [
+      {
+        label: 'Happy Customers',
+        value: '10K+',
+        icon: 'users'
+      },
+      {
+        label: 'Years Experience',
+        value: '10+',
+        icon: 'award'
+      },
+      {
+        label: 'Destinations',
+        value: '50+',
+        icon: 'globe'
+      },
+      {
+        label: 'Success Rate',
+        value: '99%',
+        icon: 'heart'
+      }
+    ],
+    image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,21 +88,33 @@ const About = () => {
   }, []);
 
   const fetchAboutData = async () => {
+    console.log('Fetching about data for admin...');
     try {
       const { data, error } = await supabase
         .from('about_us')
         .select('*')
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (data) {
+      console.log('Admin about data response:', { data, error });
+
+      if (error) {
+        console.error('Error fetching about data:', error);
+      } else if (data) {
+        console.log('About data found for admin:', data);
         setAboutData({
-          ...data,
+          id: data.id,
+          title: data.title || 'About Prabas Travels',
+          description: data.description || '',
+          story: data.story || '',
+          mission: data.mission || '',
+          vision: data.vision || '',
           values: Array.isArray(data.values) ? data.values : [],
-          stats: Array.isArray(data.stats) ? data.stats : []
+          stats: Array.isArray(data.stats) ? data.stats : [],
+          image_url: data.image_url || ''
         });
+      } else {
+        console.log('No about data found, using defaults');
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
@@ -77,7 +133,7 @@ const About = () => {
   const addValue = () => {
     setAboutData(prev => ({
       ...prev,
-      values: [...prev.values, { title: '', description: '' }]
+      values: [...prev.values, { title: '', description: '', icon: 'heart' }]
     }));
   };
 
@@ -100,7 +156,7 @@ const About = () => {
   const addStat = () => {
     setAboutData(prev => ({
       ...prev,
-      stats: [...prev.stats, { number: '', label: '' }]
+      stats: [...prev.stats, { label: '', value: '', icon: 'users' }]
     }));
   };
 
@@ -124,13 +180,23 @@ const About = () => {
     e.preventDefault();
     setSaving(true);
 
+    console.log('Saving about data:', aboutData);
+
     try {
       const dataToSave = {
-        ...aboutData,
+        title: aboutData.title,
+        description: aboutData.description,
+        story: aboutData.story,
+        mission: aboutData.mission,
+        vision: aboutData.vision,
+        values: aboutData.values,
+        stats: aboutData.stats,
+        image_url: aboutData.image_url,
         updated_at: new Date().toISOString()
       };
 
       if (aboutData.id) {
+        console.log('Updating existing about data with ID:', aboutData.id);
         const { error } = await supabase
           .from('about_us')
           .update(dataToSave)
@@ -138,6 +204,7 @@ const About = () => {
 
         if (error) throw error;
       } else {
+        console.log('Inserting new about data');
         const { error } = await supabase
           .from('about_us')
           .insert([dataToSave]);
@@ -150,7 +217,8 @@ const About = () => {
         description: "About Us information saved successfully!",
       });
       
-      fetchAboutData();
+      // Refresh data after save
+      await fetchAboutData();
     } catch (error) {
       console.error('Error saving about data:', error);
       toast({
@@ -287,8 +355,18 @@ const About = () => {
                       onChange={(e) => updateValue(index, 'description', e.target.value)}
                       placeholder="Value description"
                       rows={2}
-                      className="bg-background text-foreground"
+                      className="mb-2 bg-background text-foreground"
                     />
+                    <select
+                      value={value.icon || 'heart'}
+                      onChange={(e) => updateValue(index, 'icon', e.target.value)}
+                      className="w-full p-2 bg-background border border-input rounded-md text-foreground"
+                    >
+                      <option value="heart">Heart</option>
+                      <option value="users">Users</option>
+                      <option value="award">Award</option>
+                      <option value="globe">Globe</option>
+                    </select>
                   </div>
                   <Button
                     type="button"
@@ -318,8 +396,8 @@ const About = () => {
               {aboutData.stats.map((stat, index) => (
                 <div key={index} className="flex gap-4 items-center p-4 bg-muted rounded-lg">
                   <Input
-                    value={stat.number}
-                    onChange={(e) => updateStat(index, 'number', e.target.value)}
+                    value={stat.value}
+                    onChange={(e) => updateStat(index, 'value', e.target.value)}
                     placeholder="10K+"
                     className="flex-1 bg-background text-foreground"
                   />
@@ -329,6 +407,16 @@ const About = () => {
                     placeholder="Happy Customers"
                     className="flex-1 bg-background text-foreground"
                   />
+                  <select
+                    value={stat.icon || 'users'}
+                    onChange={(e) => updateStat(index, 'icon', e.target.value)}
+                    className="p-2 bg-background border border-input rounded-md text-foreground"
+                  >
+                    <option value="users">Users</option>
+                    <option value="award">Award</option>
+                    <option value="globe">Globe</option>
+                    <option value="heart">Heart</option>
+                  </select>
                   <Button
                     type="button"
                     variant="outline"

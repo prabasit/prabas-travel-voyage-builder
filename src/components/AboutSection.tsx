@@ -1,27 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Users, Award, Globe, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AboutData {
+  id: string;
   title: string;
-  description: string;
-  story: string;
-  mission: string;
-  vision: string;
+  description: string | null;
+  story: string | null;
+  mission: string | null;
+  vision: string | null;
   values: Array<{
     title: string;
     description: string;
     icon?: string;
-  }>;
+  }> | null;
   stats: Array<{
     label: string;
     value: string;
     icon?: string;
-  }>;
-  image_url: string;
+  }> | null;
+  image_url: string | null;
 }
 
 const AboutSection = () => {
@@ -33,6 +33,7 @@ const AboutSection = () => {
   }, []);
 
   const fetchAboutData = async () => {
+    console.log('Fetching about data...');
     try {
       const { data, error } = await supabase
         .from('about_us')
@@ -40,13 +41,22 @@ const AboutSection = () => {
         .limit(1)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      console.log('About data response:', { data, error });
+
+      if (error) {
         console.error('Error fetching about data:', error);
         return;
       }
 
       if (data) {
-        setAboutData(data);
+        console.log('About data found:', data);
+        setAboutData({
+          ...data,
+          values: Array.isArray(data.values) ? data.values : null,
+          stats: Array.isArray(data.stats) ? data.stats : null
+        });
+      } else {
+        console.log('No about data found in database');
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
@@ -82,6 +92,7 @@ const AboutSection = () => {
     );
   }
 
+  // If no data is found, show a default message
   if (!aboutData) {
     return (
       <section className="py-16 bg-background">
@@ -90,6 +101,9 @@ const AboutSection = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-8">About Prabas Travels</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Your trusted partner for unforgettable travel experiences across Nepal and beyond.
+            </p>
+            <p className="text-muted-foreground">
+              Please add content through the admin panel to display your company information here.
             </p>
           </div>
         </div>
@@ -145,6 +159,10 @@ const AboutSection = () => {
                 src={aboutData.image_url}
                 alt="About Prabas Travels"
                 className="rounded-lg shadow-lg max-w-full h-auto"
+                onError={(e) => {
+                  console.error('Failed to load image:', aboutData.image_url);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             ) : (
               <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
@@ -154,6 +172,25 @@ const AboutSection = () => {
           </div>
         </div>
 
+        {/* Values Section */}
+        {aboutData.values && aboutData.values.length > 0 && (
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {aboutData.values.map((value, index) => (
+                <Card key={index} className="text-center">
+                  <CardContent className="p-6">
+                    <div className="flex justify-center mb-4 text-primary">
+                      {getIconComponent(value.icon)}
+                    </div>
+                    <h4 className="font-semibold mb-2">{value.title}</h4>
+                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats Section */}
         {aboutData.stats && aboutData.stats.length > 0 && (
