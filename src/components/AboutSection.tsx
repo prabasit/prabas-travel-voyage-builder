@@ -30,6 +30,27 @@ const AboutSection = () => {
 
   useEffect(() => {
     fetchAboutData();
+    
+    // Set up real-time subscription for updates
+    const channel = supabase
+      .channel('about-us-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'about_us'
+        },
+        () => {
+          console.log('About us data changed, refetching...');
+          fetchAboutData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchAboutData = async () => {
@@ -57,6 +78,7 @@ const AboutSection = () => {
         });
       } else {
         console.log('No about data found in database');
+        setAboutData(null);
       }
     } catch (error) {
       console.error('Error fetching about data:', error);

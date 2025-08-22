@@ -5,6 +5,7 @@ import Hero from '../components/Hero';
 import AboutSection from '../components/AboutSection';
 import ServicesSection from '../components/ServicesSection';
 import TestimonialsCarousel from '../components/TestimonialsCarousel';
+import AwardsSection from '../components/AwardsSection';
 import ContactSection from '../components/ContactSection';
 import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
@@ -30,6 +31,11 @@ const Index = () => {
         {/* Testimonials Section */}
         <section id="testimonials" className="scroll-mt-16">
           <TestimonialsCarousel />
+        </section>
+
+        {/* Awards & Recognition Section */}
+        <section id="awards" className="scroll-mt-16">
+          <AwardsSection />
         </section>
         
         {/* Contact Section */}

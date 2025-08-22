@@ -195,21 +195,31 @@ const About = () => {
         updated_at: new Date().toISOString()
       };
 
+      let result;
       if (aboutData.id) {
         console.log('Updating existing about data with ID:', aboutData.id);
-        const { error } = await supabase
+        result = await supabase
           .from('about_us')
           .update(dataToSave)
-          .eq('id', aboutData.id);
-
-        if (error) throw error;
+          .eq('id', aboutData.id)
+          .select()
+          .single();
       } else {
         console.log('Inserting new about data');
-        const { error } = await supabase
+        result = await supabase
           .from('about_us')
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
+      }
 
-        if (error) throw error;
+      if (result.error) throw result.error;
+
+      console.log('About data saved successfully:', result.data);
+      
+      // Update the local state with the saved data
+      if (result.data) {
+        setAboutData(prev => ({ ...prev, id: result.data.id }));
       }
 
       toast({
@@ -217,8 +227,11 @@ const About = () => {
         description: "About Us information saved successfully!",
       });
       
-      // Refresh data after save
-      await fetchAboutData();
+      // Force a small delay to ensure the real-time update propagates
+      setTimeout(() => {
+        console.log('About data should now be updated on frontend');
+      }, 1000);
+      
     } catch (error) {
       console.error('Error saving about data:', error);
       toast({
