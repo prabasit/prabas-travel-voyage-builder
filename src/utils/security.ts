@@ -39,9 +39,9 @@ export const sanitizeHtml = (html: string): string => {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote'],
     ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target'],
     ALLOW_DATA_ATTR: false,
-    FORBID_SCRIPTS: true,
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
-    STRIP_COMMENTS: true
+    SANITIZE_DOM: true,
+    KEEP_CONTENT: false
   });
 };
 
