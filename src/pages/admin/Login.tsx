@@ -10,8 +10,8 @@ import { Lock, Mail } from 'lucide-react';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: 'admin@flightsnepal.com',
-    password: 'admin123'
+    email: '',
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useSecureAuth();
@@ -57,7 +57,6 @@ const Login = () => {
           />
           <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <p className="text-muted-foreground">Access the admin dashboard</p>
-         
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,7 +68,7 @@ const Login = () => {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleInputChange}
                   className="pl-10"

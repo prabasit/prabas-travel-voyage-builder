@@ -12,6 +12,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { validatePasswordStrength, sanitizeInput } from '@/utils/security';
 
 const AdminManagement = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
@@ -22,6 +23,7 @@ const AdminManagement = () => {
     role: 'admin',
     is_active: true
   });
+  const [passwordError, setPasswordError] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -40,11 +42,17 @@ const AdminManagement = () => {
 
   const createAdminMutation = useMutation({
     mutationFn: async (adminData: any) => {
+      // Validate password strength for new users
+      const passwordValidation = validatePasswordStrength(adminData.password);
+      if (!passwordValidation.isValid) {
+        throw new Error(passwordValidation.message);
+      }
+
       const { data, error } = await supabase
         .from('admin_users')
         .insert([{
-          email: adminData.email.toLowerCase().trim(),
-          password_hash: adminData.password, // In production, this should be properly hashed
+          email: sanitizeInput(adminData.email.toLowerCase().trim()),
+          password_hash: adminData.password, // This will be hashed by the database trigger
           role: adminData.role,
           is_active: adminData.is_active
         }])
@@ -72,13 +80,18 @@ const AdminManagement = () => {
   const updateAdminMutation = useMutation({
     mutationFn: async ({ id, ...adminData }: any) => {
       const updateData: any = {
-        email: adminData.email.toLowerCase().trim(),
+        email: sanitizeInput(adminData.email.toLowerCase().trim()),
         role: adminData.role,
         is_active: adminData.is_active
       };
       
+      // Only validate and update password if provided
       if (adminData.password && adminData.password.trim() !== '') {
-        updateData.password_hash = adminData.password;
+        const passwordValidation = validatePasswordStrength(adminData.password);
+        if (!passwordValidation.isValid) {
+          throw new Error(passwordValidation.message);
+        }
+        updateData.password_hash = adminData.password; // This will be hashed by the database
       }
 
       const { data, error } = await supabase
@@ -137,6 +150,7 @@ const AdminManagement = () => {
     });
     setSelectedAdmin(null);
     setIsDialogOpen(false);
+    setPasswordError('');
   };
 
   const handleEdit = (admin: any) => {
@@ -150,10 +164,22 @@ const AdminManagement = () => {
     setIsDialogOpen(true);
   };
 
+  const handlePasswordChange = (password: string) => {
+    setFormData({ ...formData, password });
+    
+    if (password && (!selectedAdmin || password.trim() !== '')) {
+      const validation = validatePasswordStrength(password);
+      setPasswordError(validation.isValid ? '' : validation.message);
+    } else {
+      setPasswordError('');
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email.trim()) {
+    const sanitizedEmail = sanitizeInput(formData.email);
+    if (!sanitizedEmail.trim()) {
       toast({
         title: 'Validation Error',
         description: 'Email is required',
@@ -166,6 +192,15 @@ const AdminManagement = () => {
       toast({
         title: 'Validation Error',
         description: 'Password is required for new admin users',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (passwordError) {
+      toast({
+        title: 'Password Error',
+        description: passwordError,
         variant: 'destructive'
       });
       return;
@@ -228,9 +263,15 @@ const AdminManagement = () => {
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
                     required={!selectedAdmin}
                   />
+                  {passwordError && (
+                    <p className="text-sm text-destructive mt-1">{passwordError}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Password must be at least 8 characters with uppercase, lowercase, number, and special character
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>
@@ -256,7 +297,10 @@ const AdminManagement = () => {
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createAdminMutation.isPending || updateAdminMutation.isPending}>
+                  <Button 
+                    type="submit" 
+                    disabled={createAdminMutation.isPending || updateAdminMutation.isPending || !!passwordError}
+                  >
                     {selectedAdmin ? 'Update' : 'Create'}
                   </Button>
                 </div>

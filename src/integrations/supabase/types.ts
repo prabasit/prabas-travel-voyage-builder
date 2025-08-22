@@ -62,7 +62,7 @@ export type Database = {
           email: string
           id: string
           is_active: boolean | null
-          password_hash: string
+          password_hash: string | null
           role: string | null
           updated_at: string | null
           user_id: string | null
@@ -72,7 +72,7 @@ export type Database = {
           email: string
           id?: string
           is_active?: boolean | null
-          password_hash: string
+          password_hash?: string | null
           role?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -82,7 +82,7 @@ export type Database = {
           email?: string
           id?: string
           is_active?: boolean | null
-          password_hash?: string
+          password_hash?: string | null
           role?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -703,6 +703,17 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      hash_password: {
+        Args: { password: string }
+        Returns: string
+      }
+      secure_admin_login: {
+        Args: { login_email: string; login_password: string }
+        Returns: {
+          success: boolean
+          user_data: Json
+        }[]
       }
     }
     Enums: {
