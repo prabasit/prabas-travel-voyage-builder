@@ -176,26 +176,20 @@ const AboutSection = () => {
           </div>
 
           <div className="flex items-center justify-center">
-            {aboutData.image_url ? (
-              <img
-                src={aboutData.image_url}
-                alt="About Prabas Travels"
-                className="rounded-lg shadow-lg max-w-full h-auto"
-                onError={(e) => {
-                  console.error('Failed to load image:', aboutData.image_url);
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">Image not available</p>
+            <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <Globe className="h-12 w-12 text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">About Image</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload an image through the admin panel
+                </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
         {/* Values Section */}
-        {aboutData.values && aboutData.values.length > 0 && (
+        {aboutData.values && Array.isArray(aboutData.values) && aboutData.values.length > 0 ? (
           <div className="mb-16">
             <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -207,6 +201,23 @@ const AboutSection = () => {
                     </div>
                     <h4 className="font-semibold mb-2">{value.title}</h4>
                     <p className="text-sm text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {['Trust & Safety', 'Personalized Service', 'Expert Guidance', 'Award Winning'].map((value, index) => (
+                <Card key={index} className="text-center">
+                  <CardContent className="p-6">
+                    <div className="flex justify-center mb-4 text-primary">
+                      {getIconComponent(['users', 'heart', 'globe', 'award'][index])}
+                    </div>
+                    <h4 className="font-semibold mb-2">{value}</h4>
+                    <p className="text-sm text-muted-foreground">Core value of our service</p>
                   </CardContent>
                 </Card>
               ))}
