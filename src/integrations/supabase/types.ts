@@ -16,42 +16,36 @@ export type Database = {
     Tables: {
       about_us: {
         Row: {
-          created_at: string | null
+          created_at: string
           description: string | null
           id: string
           image_url: string | null
           mission: string | null
-          stats: Json | null
           story: string | null
           title: string
-          updated_at: string | null
-          values: Json | null
+          updated_at: string
           vision: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           mission?: string | null
-          stats?: Json | null
           story?: string | null
           title: string
-          updated_at?: string | null
-          values?: Json | null
+          updated_at?: string
           vision?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           mission?: string | null
-          stats?: Json | null
           story?: string | null
           title?: string
-          updated_at?: string | null
-          values?: Json | null
+          updated_at?: string
           vision?: string | null
         }
         Relationships: []

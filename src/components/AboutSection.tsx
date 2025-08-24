@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Award, Globe, Heart } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AboutData {
@@ -11,16 +10,6 @@ interface AboutData {
   story: string | null;
   mission: string | null;
   vision: string | null;
-  values: Array<{
-    title: string;
-    description: string;
-    icon?: string;
-  }> | null;
-  stats: Array<{
-    label: string;
-    value: string;
-    icon?: string;
-  }> | null;
   image_url: string | null;
 }
 
@@ -42,7 +31,6 @@ const AboutSection = () => {
           table: 'about_us'
         },
         () => {
-          console.log('About us data changed, refetching...');
           fetchAboutData();
         }
       )
@@ -54,7 +42,6 @@ const AboutSection = () => {
   }, []);
 
   const fetchAboutData = async () => {
-    console.log('Fetching about data...');
     try {
       const { data, error } = await supabase
         .from('about_us')
@@ -62,43 +49,18 @@ const AboutSection = () => {
         .limit(1)
         .maybeSingle();
 
-      console.log('About data response:', { data, error });
-
       if (error) {
         console.error('Error fetching about data:', error);
         return;
       }
 
       if (data) {
-        console.log('About data found:', data);
-        setAboutData({
-          ...data,
-          values: Array.isArray(data.values) ? data.values : null,
-          stats: Array.isArray(data.stats) ? data.stats : null
-        });
-      } else {
-        console.log('No about data found in database');
-        setAboutData(null);
+        setAboutData(data);
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getIconComponent = (iconName?: string) => {
-    switch (iconName) {
-      case 'users':
-        return <Users className="h-6 w-6" />;
-      case 'award':
-        return <Award className="h-6 w-6" />;
-      case 'globe':
-        return <Globe className="h-6 w-6" />;
-      case 'heart':
-        return <Heart className="h-6 w-6" />;
-      default:
-        return <Heart className="h-6 w-6" />;
     }
   };
 
@@ -114,7 +76,6 @@ const AboutSection = () => {
     );
   }
 
-  // If no data is found, show a default message
   if (!aboutData) {
     return (
       <section className="py-16 bg-background">
@@ -176,76 +137,28 @@ const AboutSection = () => {
           </div>
 
           <div className="flex items-center justify-center">
-            <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <Globe className="h-12 w-12 text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">About Image</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Upload an image through the admin panel
-                </p>
+            {aboutData.image_url ? (
+              <img
+                src={aboutData.image_url}
+                alt="About Prabas Travels"
+                className="rounded-lg shadow-lg max-w-full h-auto"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <Building2 className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <p className="text-muted-foreground">About Image</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Upload an image through the admin panel
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
-
-        {/* Values Section */}
-        {aboutData.values && Array.isArray(aboutData.values) && aboutData.values.length > 0 ? (
-          <div className="mb-16">
-            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {aboutData.values.map((value, index) => (
-                <Card key={index} className="text-center">
-                  <CardContent className="p-6">
-                    <div className="flex justify-center mb-4 text-primary">
-                      {getIconComponent(value.icon)}
-                    </div>
-                    <h4 className="font-semibold mb-2">{value.title}</h4>
-                    <p className="text-sm text-muted-foreground">{value.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="mb-16">
-            <h3 className="text-2xl font-semibold text-center mb-8">Our Values</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {['Trust & Safety', 'Personalized Service', 'Expert Guidance', 'Award Winning'].map((value, index) => (
-                <Card key={index} className="text-center">
-                  <CardContent className="p-6">
-                    <div className="flex justify-center mb-4 text-primary">
-                      {getIconComponent(['users', 'heart', 'globe', 'award'][index])}
-                    </div>
-                    <h4 className="font-semibold mb-2">{value}</h4>
-                    <p className="text-sm text-muted-foreground">Core value of our service</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Stats Section */}
-        {aboutData.stats && aboutData.stats.length > 0 && (
-          <div className="bg-muted/30 rounded-lg p-8">
-            <h3 className="text-2xl font-semibold text-center mb-8">Our Achievements</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {aboutData.stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex justify-center mb-2 text-primary">
-                    {getIconComponent(stat.icon)}
-                  </div>
-                  <div className="text-2xl font-bold text-primary mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
