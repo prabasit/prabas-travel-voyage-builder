@@ -140,8 +140,8 @@ export const useSecureAuth = () => {
         return false;
       }
 
-      // Use the new secure login function
-      const { data, error } = await supabase.rpc('secure_admin_login', {
+      // Use the simple login function that works
+      const { data, error } = await supabase.rpc('admin_login_simple', {
         login_email: email.toLowerCase().trim(),
         login_password: password
       });

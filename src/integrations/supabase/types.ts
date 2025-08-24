@@ -700,6 +700,13 @@ export type Database = {
           user_data: Json
         }[]
       }
+      admin_login_simple: {
+        Args: { login_email: string; login_password: string }
+        Returns: {
+          success: boolean
+          user_data: Json
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
